@@ -1,0 +1,6 @@
+django
+asgiref
+django-widget-tweaks
+Pillow
+pytz
+sqlparse
