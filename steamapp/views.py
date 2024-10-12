@@ -1,12 +1,12 @@
 
+from django.db.models import Q
+from django.core.paginator import Paginator
 import os
 from django.shortcuts import render,redirect
 from steamapp import forms,models
 from django.http import HttpResponseRedirect
-from django.conf import settings
 from steamapp.models import User
 from django.contrib.auth.decorators import login_required
-from django.db import connection
 from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.signals import user_logged_in, user_logged_out
 from django.dispatch import receiver
@@ -17,11 +17,13 @@ from django.http import HttpResponse
 from django.contrib.auth import logout
 from django.urls import reverse
 from django.http import JsonResponse
-from django.shortcuts import render, redirect
 from django.contrib.auth import authenticate, login as userlogin
-from django.http import HttpResponse
 from django.db import IntegrityError
 from django.core.files.storage import default_storage
+
+def login(request):
+    return render(request, 'steamapp/index.html')
+
 def logout_view(request):
     logout(request)
     return redirect('userlogin')
@@ -154,14 +156,11 @@ def user_change_password_view(request):
     except:
         return render(request,'loginrelated/diffrentuser.html')
 
+@login_required
 def home(request):
     if request.user.is_authenticated:
         return HttpResponseRedirect(reverse('indexpage'))
-    else:
-        return HttpResponseRedirect(reverse('userlogin'))
-
-    return render(request,'loginrelated/diffrentuser.html')
-
+    return render(request,'steamapp/404page.html')
 
 def afterlogin_view(request):
     user = User.objects.all().filter(id = request.user.id)
@@ -171,9 +170,9 @@ def afterlogin_view(request):
             if xx.is_superuser:
                 request.session['utype'] = 'admin'
                 return redirect('admin-dashboard')
-            if xx.utype == 'CANDIDATE':
+            if xx.utype == 'student':
                 if xx.status:
-                    request.session['utype'] = 'CANDIDATE'
+                    request.session['utype'] = 'student'
                     dict={
                     'total_course':0,
                     'total_exam':0,
@@ -182,16 +181,11 @@ def afterlogin_view(request):
                     'total_short':0,
                     'total_learner':0,
                     }
-                    return render(request,'student/candidate_dashboard.html',context=dict)
+                    return render(request,'student/student_dashboard.html',context=dict)
                 else:
                     return render(request,'loginrelated/wait_for_approval.html')
     else:
         return render(request, 'loginrelated/userlogin.html')
-
-def adminclick_view(request):
-    if request.user.is_authenticated:
-        return HttpResponseRedirect('indexpage')
-    return HttpResponseRedirect('userlogin')
 
 @login_required
 def admin_dashboard_view(request):
@@ -199,7 +193,7 @@ def admin_dashboard_view(request):
         if str(request.session['utype']) == 'admin':
             dict={
             'total_learner':0,
-            'total_candidate':0,
+            'total_student':0,
             'total_exam':0,
             'total_question':0,
             }
@@ -211,10 +205,21 @@ def admin_dashboard_view(request):
 def admin_view_user_list_view(request):
     #try:    
         if str(request.session['utype']) == 'admin':
+            query = request.GET.get('search', '')
             users = User.objects.all().filter(is_superuser = False)
-            for x in users:
-                print(x)
-            return render(request,'steamapp/users/admin_view_user_list.html',{'users':users})
+
+            if query:
+                users = users.filter(
+                    Q(first_name__icontains=query) |
+                    Q(last_name__icontains=query) |
+                    Q(username__icontains=query)
+                )
+
+            # Pagination
+            paginator = Paginator(users, 12)  # Show 10 users per page
+            page_number = request.GET.get('page')
+            users_paginated = paginator.get_page(page_number)
+            return render(request,'steamapp/users/admin_view_user_list.html',{'users': users_paginated, 'query': query})
     #except:
         return render(request,'loginrelated/diffrentuser.html')
 
@@ -322,89 +327,3 @@ def delete_user_view(request,pk):
             return HttpResponseRedirect('/admin-view-user-list',{'users':users})
     except:
         return render(request,'loginrelated/diffrentuser.html')
-    
-import string
-from .models import Student
-import random
-from datetime import datetime, timedelta
-def random_string(length=10):
-    """Generate a random string of fixed length."""
-    letters = string.ascii_letters
-    return ''.join(random.choice(letters) for i in range(length))
-
-def random_email():
-    """Generate a random email address."""
-    return f"{random_string(10)}@example.com"
-
-def random_date_of_birth():
-    """Generate a random date of birth."""
-    start_date = datetime(1950, 1, 1)
-    end_date = datetime(2005, 12, 31)
-    delta = end_date - start_date
-    random_days = random.randrange(delta.days)
-    return start_date + timedelta(days=random_days)
-
-def insert_students(request):
-    num_records = 100  # Adjust this as needed for testing
-    
-    for _ in range(num_records):
-        Student.objects.create(
-            first_name=random_string(8),
-            last_name=random_string(8),
-            email=random_email(),
-            date_of_birth=random_date_of_birth(),
-            address=f'{random.randint(1, 9999)} {random_string(5)} St',
-            phone_number=f'(555) {random.randint(100, 999)}-{random.randint(1000, 9999)}',
-            gender=random.choice(['Male', 'Female']),
-            enrollment_date=datetime.now() - timedelta(days=random.randint(1, 3650)),
-            
-        )
-    
-    return HttpResponse(f"{num_records} records inserted!")
-
-from django.core.paginator import Paginator
-from django.db.models import Q
-from django.http import JsonResponse
-def student_list(request):
-    form = forms.StudentSearchForm(request.GET or None)
-    students = Student.objects.all()
-    
-    if form.is_valid():
-        cleaned_data = form.cleaned_data
-        first_name = cleaned_data.get('first_name')
-        last_name = cleaned_data.get('last_name')
-        email = cleaned_data.get('email')
-        gender = cleaned_data.get('gender')
-        address = cleaned_data.get('address')
-        
-        if first_name:
-            students = students.filter(first_name__icontains=first_name)
-        if last_name:
-            students = students.filter(last_name__icontains=last_name)
-        if email:
-            students = students.filter(email__icontains=email)
-        if gender:
-            students = students.filter(gender=gender)
-        if address:
-            students = students.filter(address__icontains=address)
-
-    # Handle results per page
-    results_per_page = request.GET.get('results_per_page', 10)  # Default to 10 if not specified
-    paginator = Paginator(students, results_per_page)
-    page_number = request.GET.get('page', 1)
-    page_obj = paginator.get_page(page_number)
-    
-    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        # Return data as JSON
-        students_data = list(page_obj.object_list.values('first_name', 'last_name', 'email', 'gender', 'address'))
-        return JsonResponse({
-            'students': students_data,
-            'has_next': page_obj.has_next(),
-            'has_previous': page_obj.has_previous(),
-            'next_page_number': page_obj.next_page_number() if page_obj.has_next() else None,
-            'previous_page_number': page_obj.previous_page_number() if page_obj.has_previous() else None,
-            'current_page': page_obj.number,
-            'total_pages': page_obj.paginator.num_pages
-        })
-    
-    return render(request, 'student_list.html', {'form': form, 'page_obj': page_obj})

@@ -11,12 +11,30 @@
                 </a>
             </li>
             <li><a class="has-arrow " href="javascript:void(0);" aria-expanded="false">
-                <i class="bi bi-heart"></i>
-                <span class="nav-text">Users</span>
+                <i class="bi bi-building"></i>
+                <span class="nav-text">Schools</span>
             </a>
             <ul aria-expanded="false">
-                <li><a href="{% url 'admin-view-user-list' %}">User List</a></li>
-                <li><a href="{% url 'signup' %}">Create User</a></li>
+                <li><a href="{% url 'school_list' %}">Schools List</a></li>
+                <li><a href="{% url 'school_create' %}">Create Schools</a></li>
+            </ul>
+            <li><a class="has-arrow " href="javascript:void(0);" aria-expanded="false">
+                <i class="fa fa-graduation-cap"></i>
+                <span class="nav-text">Grades</span>
+            </a>
+            <ul aria-expanded="false">
+                <li><a href="{% url 'grade_list' %}">Grades List</a></li>
+                <li><a href="{% url 'grade_create' %}">Create Grades</a></li>
+            </ul>
+
+            <li><a class="has-arrow " href="javascript:void(0);" aria-expanded="false">
+                <i class="bi bi-people  "></i>
+                <span class="nav-text">Students</span>
+            </a>
+            <ul aria-expanded="false">
+                <li><a href="{% url 'admin-view-user-list' %}">Student List</a></li>
+                <li><a href="{% url 'signup' %}">Create Students</a></li>
+                <li><a href="{% url 'upload_students' %}">Upload Students</a></li>
             </ul>
         </li>
         <li>

@@ -1,7 +1,7 @@
 {% extends 'steamapp/adminbase.html' %}
 {% block content %}
 {% load static %}
-{% load guru_filters %}
+{% load steam_filters %}
 <div class="col-md-6 login-wrap-bg">
     <h1>User Name: {{ users.username }} </h1>
     <form id="signup-form" method="post" enctype="multipart/form-data">

@@ -4,19 +4,37 @@ import datetime
 
 from django.contrib.auth.models import AbstractUser
 
+class Grade(models.Model):
+    # Example fields
+    grade_name = models.CharField(max_length=100)
+    
+    def __str__(self):
+        return self.grade_name
+
+class School(models.Model):
+    school_name = models.CharField(max_length=100)
+    contact_person = models.CharField(max_length=100)
+    email = models.EmailField()
+    address = models.TextField()
+    phone_number = models.CharField(max_length=15)
+    enrollment_date = models.DateField(auto_now=True)
+    def __str__(self):
+        return self.school_name
+    
 class User(AbstractUser):
+    school=models.ForeignKey(School,on_delete=models.SET_NULL, null=True)
+    grade=models.ForeignKey(Grade,on_delete=models.SET_NULL, null=True)
+    roll_no = models.CharField(max_length=200)
     user_full_name = models.CharField(max_length=200)
     email = models.CharField(max_length=200)
     CAT = (
-        ("CANDIDATE", "CANDIDATE"),
+        ("student", "student"),
     )
-
-    utype = models.CharField(max_length=200, choices=CAT, default="CANDIDATE")
-
+    utype = models.CharField(max_length=200, choices=CAT, default="student")
     mobile = models.CharField(max_length=10)
     whatsappno = models.CharField(max_length=10)
     profile_pic = models.ImageField(upload_to='profile_pics/', blank=True, null=True)
-    banner_pic = models.ImageField(upload_to='banner_pics/', blank=True, null=True)
+    profile_updated = models.BooleanField(default=False)
     status = models.BooleanField(default=False)
 
 class UserLog(models.Model):
@@ -62,15 +80,4 @@ class LastUserLogin(models.Model):
     user=models.ForeignKey(User,on_delete=models.SET_NULL, null=True)
 
 
-class Student(models.Model):
-    # Example fields
-    first_name = models.CharField(max_length=100)
-    last_name = models.CharField(max_length=100)
-    email = models.EmailField()
-    date_of_birth = models.DateField()
-    address = models.TextField()
-    phone_number = models.CharField(max_length=15)
-    gender = models.CharField(max_length=10)
-    enrollment_date = models.DateField()
-    def __str__(self):
-        return f"{self.first_name} {self.last_name}"
+    

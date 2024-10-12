@@ -156,7 +156,7 @@ EMAIL_RECEIVING_USER = ['info@nubeera.com'] # email on which you will receive me
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'steamapp.User'
-LOGIN_URL = 'indexpage'
+LOGIN_URL = 'login'
 LOGIN_REDIRECT_URL = 'home'
 LOGOUT_URL = 'logout'
 LOGOUT_REDIRECT_URL = 'login'

@@ -8,9 +8,9 @@ from django.contrib.auth.models import User
 from django.db.models import Sum,Count,Q
 from django.urls import reverse
 @login_required    
-def candidate_dashboard_view(request):
+def student_dashboard_view(request):
     #try:
-        if str(request.session['utype']) == 'CANDIDATE':
+        if str(request.session['utype']) == 'student':
             dict={
             'total_course':0,
             'total_exam':0,
@@ -19,7 +19,7 @@ def candidate_dashboard_view(request):
             'total_short':0,
             'total_learner':0,
             }
-            return render(request,'student/candidate_dashboard.html',context=dict)
+            return render(request,'student/student_dashboard.html',context=dict)
         else:
             return render(request,'loginrelated/diffrentuser.html')
     #except:
