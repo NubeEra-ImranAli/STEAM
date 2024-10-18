@@ -196,8 +196,8 @@ def module_create(request):
     if str(request.session['utype']) == 'admin':
         if request.method == 'POST':
             grade = request.POST.get('grade')
-            module_name = request.POST.get('module_name')
-            description = request.POST.get('description')
+            module_name = request.POST['module_name']
+            description = request.POST['description']
             module_pic = request.FILES.get('module_pic')  # Fetch the file if uploaded
             if module_name:
                 mode = MyModels.Module.objects.create(grade_id=grade,module_name=module_name,description=description)
