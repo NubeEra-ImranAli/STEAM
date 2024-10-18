@@ -1,0 +1,111 @@
+{% extends 'steamapp/adminbase.html' %}
+{% block content %}
+{% load static %}
+<link rel="stylesheet" href="/static/get/css/style.css">
+<style>
+  ol.breadcrumb li+li:before {
+    content: '\f061';
+  display: inline-block;
+  font-family: 'fontAwesome';
+  padding: 0 10px;
+  }
+</style>
+<div>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li>
+                <a href="{% url 'user-dashboard' %}">Dashboard</a>
+            </li>
+            <li>
+                <a href="{% url 'module_list' %}">Module List</a>
+            </li>
+            <li aria-current="page">Creating Module</li>
+        </ol>
+    </nav>
+</div>
+{% if messages %}
+    {% for message in messages %}
+<div class="alert alert-success" id="success-message">{{ message }}</div>
+{% endfor %}
+{% endif %}
+<script>
+    // Wait for the DOM to load
+    document.addEventListener("DOMContentLoaded", function() {
+        // Select the success message
+        var message = document.getElementById("success-message");
+        if (message) {
+            // Set a timer to hide the message after 5 seconds (5000 ms)
+            setTimeout(function() {
+                message.style.display = 'none';
+            }, 5000);
+        }
+    });
+</script>
+<form method="post">
+    {% csrf_token %}
+    <div class="row">
+        <div class="col-xl-12 col-lg-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">Create Module</h4>
+                </div>
+                <div class="card-body">
+                    {% csrf_token %}
+                    <div class="basic-form">
+                        <div class="row">
+                            <div class="mb-6 col-md-6">
+                                <label class="form-label" for="grade">Grade</label>
+                                <select
+                                    class="form-control"
+                                    id="grade"
+                                    name="grade"
+                                    required
+                                >
+                                    {% for t in grades %}
+                                    <option value="{{ t.id }}">{{ t.grade_name }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="mb-6 col-md-6">
+                                <label class="col-form-label" for="Module_name">Module Name</label>
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    name="Module_name"
+                                    id="Module_name"
+                                    placeholder="Enter Module Name"
+                                    required
+                                >
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="mb-6 col-md-6">
+                                <label class="col-form-label" for="description">Description</label>
+                                <input
+                                    type="text"
+                                    class="form-control"
+                                    name="description"
+                                    id="description"
+                                    placeholder="Enter description"
+                                    required
+                                >
+                            </div>
+                            <div class="mb-6 col-md-6">
+                                <label class="form-control-label" for="module_pic">Module Picture</label>
+                                <input
+                                    type="file"
+                                    id="module_pic"
+                                    name="module_pic"
+                                    class="form-control"
+                                    required
+                                >
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Create</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+{% endblock content %}

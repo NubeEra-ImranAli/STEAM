@@ -36,6 +36,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'steamapp',
+    'principle',
+    'teacher',
     'student',
     'widget_tweaks',
     'django.contrib.humanize',  # A set of Django template filters useful for adding a “human touch” to data.

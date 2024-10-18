@@ -1,7 +1,7 @@
 from django.db import models
 from django.db import models
 import datetime
-
+from django.utils import timezone
 from django.contrib.auth.models import AbstractUser
 
 class Grade(models.Model):
@@ -10,6 +10,13 @@ class Grade(models.Model):
     
     def __str__(self):
         return self.grade_name
+    
+class Division(models.Model):
+    # Example fields
+    division_name = models.CharField(max_length=100)
+    
+    def __str__(self):
+        return self.division_name
 
 class School(models.Model):
     school_name = models.CharField(max_length=100)
@@ -24,10 +31,13 @@ class School(models.Model):
 class User(AbstractUser):
     school=models.ForeignKey(School,on_delete=models.SET_NULL, null=True)
     grade=models.ForeignKey(Grade,on_delete=models.SET_NULL, null=True)
+    division=models.ForeignKey(Division,on_delete=models.SET_NULL, null=True)
     roll_no = models.CharField(max_length=200)
     user_full_name = models.CharField(max_length=200)
     email = models.CharField(max_length=200)
     CAT = (
+        ("principle", "principle"),
+        ("teacher", "teacher"),
         ("student", "student"),
     )
     utype = models.CharField(max_length=200, choices=CAT, default="student")
@@ -36,6 +46,8 @@ class User(AbstractUser):
     profile_pic = models.ImageField(upload_to='profile_pics/', blank=True, null=True)
     profile_updated = models.BooleanField(default=False)
     status = models.BooleanField(default=False)
+    created =  models.DateTimeField(default=timezone.now)
+
 
 class UserLog(models.Model):
     user=models.ForeignKey(User,on_delete=models.SET_NULL, null=True)
@@ -79,5 +91,10 @@ class ErrorLog(models.Model):
 class LastUserLogin(models.Model):
     user=models.ForeignKey(User,on_delete=models.SET_NULL, null=True)
 
-
-    
+class Module(models.Model):
+    grade = models.ForeignKey(Grade, on_delete=models.SET_NULL, null=True)
+    module_name = models.CharField(max_length=200)
+    description = models.CharField(max_length=1000,default='')
+    module_pic = models.ImageField(upload_to='module_pic/', blank=True, null=True)
+    def __str__(self):
+        return self.module_name

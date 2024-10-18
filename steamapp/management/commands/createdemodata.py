@@ -13,7 +13,7 @@ class Command(BaseCommand):
                 address = 'School address',
                 phone_number = '1234567890'
             ).save()
-        self.stdout.write(self.style.NOTICE('Schools created successfully...'))
+        self.stdout.write(self.style.SUCCESS('Schools created successfully...'))
         self.stdout.write(self.style.NOTICE('Creating Grades...'))
         
         MyModels.Grade.objects.create(
@@ -35,5 +35,41 @@ class Command(BaseCommand):
         MyModels.Grade.objects.create(
                 grade_name = 'IX',
             ).save()
+        self.stdout.write(self.style.SUCCESS('Grades created successfully...'))
+
         
+        self.stdout.write(self.style.NOTICE('Creating Divisions...'))
+                
+        MyModels.Division.objects.create(
+                division_name = 'A',
+            ).save()
         
+        MyModels.Division.objects.create(
+                division_name = 'B',
+            ).save()
+        
+        MyModels.Division.objects.create(
+                division_name = 'C',
+            ).save()
+        
+        MyModels.Division.objects.create(
+                division_name = 'D',
+            ).save()
+        
+        MyModels.Division.objects.create(
+                division_name = 'E',
+            ).save()
+        MyModels.Division.objects.create(
+                division_name = 'F',
+            ).save()
+        MyModels.Division.objects.create(
+                division_name = 'G',
+            ).save()
+        MyModels.Division.objects.create(
+                division_name = 'H',
+            ).save()
+        MyModels.Division.objects.create(
+                division_name = 'I',
+            ).save()
+
+        self.stdout.write(self.style.SUCCESS('Divisions created successfully...'))

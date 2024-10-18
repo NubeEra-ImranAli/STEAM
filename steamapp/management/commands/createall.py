@@ -11,9 +11,10 @@ class Command(BaseCommand):
         self.stdout.write(self.style.NOTICE('Running migrate...'))
         call_command('migrate')
 
+        self.stdout.write(self.style.NOTICE('Creating Demo data...'))
+        call_command('createdemodata')
+        
         self.stdout.write(self.style.NOTICE('Creating admin user...'))
         call_command('createadmin')  # No need to pass arguments since it's predefined
-
-        call_command('createdemodata')
 
         self.stdout.write(self.style.SUCCESS('All commands executed successfully.'))

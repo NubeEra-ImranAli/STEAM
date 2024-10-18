@@ -434,7 +434,6 @@ var GetSkills = (function () {
       });
     }
   };
-  
 
   /* Function ============ */
   return {
