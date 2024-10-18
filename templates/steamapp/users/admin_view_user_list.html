@@ -258,7 +258,7 @@
 
         function showMessage(message, isSuccess) {
             messageContainer.textContent = message;
-            messageContainer.className = isSuccess ? 'alert alert-success' : 'alert alert-danger';
+            messageContainer.className = isSuccess ? 'alert alert-info' : 'alert alert-danger';
             messageContainer.style.display = 'block';
             setTimeout(() => {
                 messageContainer.style.display = 'none';

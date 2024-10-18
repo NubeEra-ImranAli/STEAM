@@ -36,9 +36,11 @@ class Command(BaseCommand):
             User.objects.create_user(username=username, email=email, password=password, status=True, utype='principle',school_id=school_id)
             self.stdout.write(self.style.SUCCESS(f'Principle "{username}" created successfully.'))
         
-        self.stdout.write(self.style.WARNING(f'Creating Teacher'))
+
+        self.stdout.write(self.style.WARNING(f'Creating Staff'))
         # Creating the teacher (non-superuser)
-        username = 'teacher'
+        school_id = School.objects.values('id')[0]['id']
+        username = 'staff'
         email = 'imran@example.com'
         password = 'steam123'  # Change this to your desired password
 
@@ -48,5 +50,21 @@ class Command(BaseCommand):
             self.stdout.write(self.style.WARNING(f'User "{username}" already exists.'))
         else:
             # Using create_user instead of create_superuser
-            User.objects.create_user(username=username, email=email, password=password, status=True, utype='teacher',school_id=school_id)
-            self.stdout.write(self.style.SUCCESS(f'Teacher "{username}" created successfully.'))
+            User.objects.create_user(username=username, email=email, password=password, status=True, utype='staff',school_id=school_id)
+            self.stdout.write(self.style.SUCCESS(f'Staff "{username}" created successfully.'))
+        
+
+        self.stdout.write(self.style.WARNING(f'Creating Teacher'))
+        # Creating the teacher (non-superuser)
+        username = 'teacher'
+        email = 'imran@example.com'
+        password = 'steam123'  # Change this to your desired password
+        for i in range (10):
+            self.stdout.write(self.style.NOTICE(f'Creating teacher {i+1}'))
+            username = f'teacher{i+1}'
+            if User.objects.filter(username=username).exists():
+                self.stdout.write(self.style.WARNING(f'User "{username}" already exists.'))
+            else:
+                # Using create_user instead of create_superuser
+                User.objects.create_user(username=username, email=email, password=password, status=True, utype='teacher',school_id=i+1)
+                self.stdout.write(self.style.SUCCESS(f'Teacher "{username}" created successfully.'))

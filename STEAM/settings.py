@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'widget_tweaks',
     'django.contrib.humanize',  # A set of Django template filters useful for adding a “human touch” to data.
     'django.contrib.sites',
+    'django_celery_progress',
     
 ]
 

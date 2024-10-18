@@ -1,4 +1,4 @@
-{% extends 'steamapp/adminbase.html' %}
+{% extends 'staff/staffbase.html' %}
 {% block content %}
 {% load static %}
 <link rel="stylesheet" href="/static/get/css/style.css">
@@ -25,7 +25,7 @@
 </div>
 {% if messages %}
     {% for message in messages %}
-<div class="alert alert-success" id="success-message">{{ message }}</div>
+<div class="alert alert-info" id="success-message">{{ message }}</div>
 {% endfor %}
 {% endif %}
 <script>
@@ -41,7 +41,7 @@
         }
     });
 </script>
-<form method="post">
+<form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     <div class="row">
         <div class="col-xl-12 col-lg-12">
@@ -67,12 +67,12 @@
                                 </select>
                             </div>
                             <div class="mb-6 col-md-6">
-                                <label class="col-form-label" for="Module_name">Module Name</label>
+                                <label class="col-form-label" for="module_name">Module Name</label>
                                 <input
                                     type="text"
                                     class="form-control"
-                                    name="Module_name"
-                                    id="Module_name"
+                                    name="module_name"
+                                    id="module_name"
                                     placeholder="Enter Module Name"
                                     required
                                 >

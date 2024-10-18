@@ -314,7 +314,7 @@ def user_dashboard_view(request):
         'total_short':0,
         'total_learner':0,
         }
-        return render(request,'staff/tstaff_dashboard.html',context=dict)
+        return render(request,'staff/staff_dashboard.html',context=dict)
     return render(request,'loginrelated/diffrentuser.html')
 
 @login_required

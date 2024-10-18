@@ -144,21 +144,17 @@ def upload_student_csv(request):
                 grid = 0
                 divid = 0
                 for row in csv_reader:
-                    if len(row) != 5:
-                        continue  # Skip row if it doesn't have expected 5 fields
                     fname, lname, grade, division, rollno = [col.strip() for col in row]
 
                     # Fetch or create Grade
-                    if grade != oldgr:
-                        oldgr = grade
-                        gr, created = MyModels.Grade.objects.get_or_create(grade_name=oldgr)
-                        grid = gr.id
+                
+                    gr = MyModels.Grade.objects.get_or_create(grade_name=grade)
+                    grid = gr.id
 
                     # Fetch or create Division
-                    if division != olddiv:
-                        olddiv = division
-                        dv, created = MyModels.Division.objects.get_or_create(division_name=olddiv)
-                        divid = dv.id
+                    
+                    dv = MyModels.Division.objects.get_or_create(division_name=division)
+                    divid = dv.id
 
                     # Ensure username is unique
                     username = fname + '_' + lname
@@ -203,4 +199,5 @@ def teacher_view_user_list_view(request):
     #except:
         return render(request,'loginrelated/diffrentuser.html')
 
+    
     
