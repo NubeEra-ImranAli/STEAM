@@ -1,0 +1,87 @@
+{% extends 'staff/staffbase.html' %}
+{% block content %}
+{% load static %}
+<link rel="stylesheet" href="/static/get/css/style.css">
+<style>
+  ol.breadcrumb li+li:before {
+    content: '\f061';
+  display: inline-block;
+  font-family: 'fontAwesome';
+  padding: 0 10px;
+  }
+</style>
+<div>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li>
+                <a href="{% url 'user-dashboard' %}">Dashboard</a>
+            </li>
+            <li>
+                <a href="{% url 'lesson_create' %}">New Lesson</a>
+            </li>
+            <li aria-current="page">View Lessons</li>
+        </ol>
+    </nav>
+</div>
+{% if messages %}
+    {% for message in messages %}
+<div class="alert alert-info" id="success-message">{{ message }}</div>
+{% endfor %}
+{% endif %}
+<script>
+    // Wait for the DOM to load
+    document.addEventListener("DOMContentLoaded", function() {
+        // Select the success message
+        var message = document.getElementById("success-message");
+        if (message) {
+            // Set a timer to hide the message after 5 seconds (5000 ms)
+            setTimeout(function() {
+                message.style.display = 'none';
+            }, 5000);
+        }
+    });
+</script>
+<div class="card">
+    <div class="table-responsive">
+        <table
+            class="table table-bordered"
+            id="dataTable"
+            width="100%"
+            cellspacing="0"
+        >
+            <thead>
+                <tr>
+                    <th>Grade</th>
+                    <th>Module</th>
+                    <th>Preview</th>
+                    <th>Update</th>
+                    <th>Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for lesson in lessons %}
+                <tr>
+                    <td> {{lesson.grade}}</td>
+                    <td> {{lesson.module}}</td>
+                    <td>
+                        <a class="btn btn-primary btn-xs" href="{% url 'lesson_preview' lesson.id %}">
+                            <span class="	far fa-eye"></span>
+                        </a>
+                    </td>
+                    <td>
+                        <a class="btn btn-primary btn-xs" href="{% url 'lesson_update' lesson.id %}">
+                            <span class="	far fa-edit"></span>
+                        </a>
+                    </td>
+                    <td>
+                        <a class="btn btn-danger btn-xs" href="{% url 'lesson_delete' lesson.id %}" onclick="return confirm('Are you sure?')">
+                            <span class="far fa-trash-alt"></span>
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock content %}

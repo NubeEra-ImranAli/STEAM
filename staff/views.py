@@ -299,3 +299,238 @@ def module_delete(request, id):
         return redirect('module_list')
     else:
         return render(request,'loginrelated/diffrentuser.html')
+    
+def get_modules(request):
+    grade_id = request.GET.get('grade_id')
+    modules = MyModels.Module.objects.filter(grade_id=grade_id).values('id', 'module_name')
+    return JsonResponse(list(modules), safe=False)
+
+    # Display list of lessons
+@login_required
+def lesson_list(request):
+    if str(request.session['utype']) == 'staff':
+        lessons = MyModels.Lesson.objects.all()
+        return render(request, 'staff/lesson/lesson_list.html', {'lessons': lessons})
+    else:
+        return render(request,'loginrelated/diffrentuser.html')
+
+@login_required
+    
+def lesson_preview(request, id):
+    if str(request.session['utype']) == 'staff':
+        les = get_object_or_404(MyModels.Lesson, id=id)
+        grade = les.grade_id
+        module = les.module_id
+        heading = les.heading
+        about =  les.about 
+        reqmaterial = les.reqmaterial 
+        digram = les.digram
+        code = les.code
+        process = les.process
+        get = les.get
+        video = les.video
+        return render(request, 'staff/lesson/lesson_preview.html', {
+            'grade': grade,
+            'module': module,
+            'heading': heading,
+            'about': about,
+            'reqmaterial': reqmaterial,
+            'digram': digram,
+            'code': code,
+            'process': process,
+            'get': get,
+            'video': video,
+        })
+    else:
+        return render(request, 'loginrelated/diffrentuser.html')
+
+# Create a new lesson
+@login_required
+def lesson_create(request):
+    if str(request.session['utype']) == 'staff':
+        if request.method == 'POST':
+            grade = request.POST.get('grade')
+            module = request.POST.get('module')
+            serialno = request.POST['serialno']
+            heading = request.POST['heading']
+            about = request.POST['about']
+            reqmaterial = request.POST['reqmaterial']
+            digram = request.POST['digram']
+            code = request.POST['code']
+            process = request.POST['process']
+            get = request.POST['get']
+            video = request.POST['video']
+            mode = MyModels.Lesson.objects.create(grade_id=grade,
+                                                  module_id=module,
+                                                  serialno = serialno,
+                                                  heading=heading,
+                                                  about=about,
+                                                  reqmaterial=reqmaterial,
+                                                  digram=digram,
+                                                  code=code,
+                                                  process=process,
+                                                  get=get,
+                                                  video=video
+                                                  )
+            mode.save()
+            messages.success(request, 'Lesson created successfully!')
+            return redirect('lesson_create')
+        grade = MyModels.Grade.objects.filter(id__isnull=False)\
+                        .values('id','grade_name')
+        grade = sorted(
+                            grade,
+                            key=lambda x: (ROMAN_NUMERAL_MAP.get(x['grade_name'], 0))
+                        )
+        
+        return render(request, 'staff/lesson/lesson_create.html',{'grades':grade})
+    else:
+        return render(request,'loginrelated/diffrentuser.html')
+
+# Update an existing lesson
+@login_required
+    
+def lesson_update(request, id):
+    if str(request.session['utype']) == 'staff':
+        if request.method == 'POST':
+            grade = request.POST.get('grade')
+            module = request.POST.get('module')
+            serialno = request.POST['serialno']
+            heading = request.POST['heading']
+            about = request.POST['about']
+            reqmaterial = request.POST['reqmaterial']
+            digram = request.POST['digram']
+            code = request.POST['code']
+            process = request.POST['process']
+            get = request.POST['get']
+            video = request.POST['video']
+            
+            les = get_object_or_404(MyModels.Lesson, id=id)
+            les.grade_id = grade
+            les.module = module
+            les.serialno = serialno
+            les.heading = heading
+            les.about = about
+            les.reqmaterial = reqmaterial
+            les.digram = digram
+            les.code = code
+            les.process = process
+            les.get = get
+            les.video = video
+            les.save()
+            messages.success(request, 'Lesson updated successfully!' if id else 'Lesson created successfully!')
+            return redirect('lesson_list')
+
+        grades = MyModels.Grade.objects.filter(id__isnull=False).values('id', 'grade_name')
+        grades = sorted(grades, key=lambda x: (ROMAN_NUMERAL_MAP.get(x['grade_name'], 0)))
+
+        les = get_object_or_404(MyModels.Lesson, id=id)
+        grade = les.grade_id
+        module = les.module_id
+        serialno = les.serialno
+        heading = les.heading
+        about =  les.about 
+        reqmaterial = les.reqmaterial 
+        digram = les.digram
+        code = les.code
+        process = les.process
+        get = les.get
+        video = les.video
+        return render(request, 'staff/lesson/lesson_update.html', {
+            'grades': grades,
+            'grade': grade,
+            'module': module,
+            'serialno' :serialno,
+            'heading': heading,
+            'about': about,
+            'reqmaterial': reqmaterial,
+            'digram': digram,
+            'code': code,
+            'process': process,
+            'get': get,
+            'video': video,
+        })
+    else:
+        return render(request, 'loginrelated/diffrentuser.html')
+
+# Delete a lesson
+@login_required
+def lesson_delete(request, id):
+    if str(request.session['utype']) == 'staff':
+        lesson = get_object_or_404(MyModels.Lesson, id=id)
+        
+        # Check if there is a lesson_pic and delete the file if it exists
+        if lesson.lesson_pic:
+            # Construct the full file path
+            file_path = os.path.join(settings.MEDIA_ROOT, str(lesson.lesson_pic))
+            
+            # Delete the file if it exists
+            if os.path.isfile(file_path):
+                os.remove(file_path)
+        
+        # Now delete the lesson instance
+        lesson.delete()
+        
+        return redirect('lesson_list')
+    else:
+        return render(request,'loginrelated/diffrentuser.html')
+
+import uuid
+from urllib.parse import urljoin
+import requests
+from django.http import JsonResponse
+import base64  # Import the base64 module
+# Load the Git access token from environment variables
+
+GIT_REPO_URL = "https://oauth:NubeEra-ImranAli@github.com/NubeEra-ImranAli/study_kit.git"
+GITHUB_RAW_BASE_URL = "https://raw.githubusercontent.com/NubeEra-ImranAli/study_kit/main/"
+GIT_API_URL = "https://api.github.com/repos/NubeEra-ImranAli/study_kit/contents/"
+
+def load_file_mapping():
+    headers = {
+        "Authorization": f"Bearer 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"  # Use your GitHub personal access token
+    }
+    response = requests.get(GIT_API_URL, headers=headers)
+
+    if response.status_code == 200:
+        return {file['name']: str(uuid.uuid4()) for file in response.json()}
+            
+    else:
+        return {}
+def upload_html_file(request):
+    if request.method == "POST":
+        # Get the uploaded file
+        uploaded_file = request.FILES['file']
+        file_name = uploaded_file.name
+
+        # Prepare the API URL and headers
+        api_url = f"{GIT_API_URL}{file_name}"
+        headers = {
+            "Authorization": f"Bearer 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",  # Use your GitHub personal access token
+            "Content-Type": "application/json"
+        }
+
+        # Read the content of the uploaded file
+        content = uploaded_file.read().decode('utf-8')
+        # Prepare data to send to GitHub
+        encoded_content = base64.b64encode(content.encode('utf-8')).decode('utf-8')
+        data = {
+            "message": f"Add {file_name}",
+            "content": encoded_content,
+            "branch": "main"
+        }
+
+        # Send the PUT request to GitHub
+        response = requests.put(api_url, headers=headers, json=data)
+
+        if response.status_code == 201:
+            return redirect('view_html')  # Redirect to the file list view
+        else:
+            return JsonResponse({"error": "Failed to upload file"}, status=response.status_code)
+
+    return render(request, 'steamapp/upload.html')
+
+def view_html_file(request):
+    file_mapping = load_file_mapping()  # Load file mapping each time
+    return render(request, 'steamapp/file_list.html', {
+        'file_mapping': file_mapping
+    })

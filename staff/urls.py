@@ -22,4 +22,14 @@ urlpatterns = [
     path('modules/create/', views.module_create, name='module_create'),
     path('modules/update/<int:id>/', views.module_update, name='module_update'),
     path('modules/delete/<int:id>/', views.module_delete, name='module_delete'),
+
+    path('get-modules/', views.get_modules, name='get_modules'),
+    path('lessons/', views.lesson_list, name='lesson_list'),
+    path('lessons/create/', views.lesson_create, name='lesson_create'),
+    path('lessons/update/<int:id>/', views.lesson_update, name='lesson_update'),
+    path('lessons/delete/<int:id>/', views.lesson_delete, name='lesson_delete'),
+    path('lessons/preview/<int:id>/', views.lesson_preview, name='lesson_preview'),
+
+    path('upload/', views.upload_html_file, name='upload_html'),
+    path('view/', views.view_html_file, name='view_html'),  # File list view
 ]

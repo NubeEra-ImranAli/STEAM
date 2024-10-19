@@ -3,11 +3,10 @@ from django.db import models
 import datetime
 from django.utils import timezone
 from django.contrib.auth.models import AbstractUser
-
+from ckeditor.fields import RichTextField
 class Grade(models.Model):
     # Example fields
     grade_name = models.CharField(max_length=100)
-    
     def __str__(self):
         return self.grade_name
     
@@ -98,3 +97,19 @@ class Module(models.Model):
     module_pic = models.ImageField(upload_to='module_pic/', blank=True, null=True)
     def __str__(self):
         return self.module_name
+    
+class Lesson(models.Model):
+    grade = models.ForeignKey(Grade, on_delete=models.SET_NULL, null=True)
+    module = models.ForeignKey(Module, on_delete=models.SET_NULL, null=True)
+    serialno = models.PositiveIntegerField()
+    heading = RichTextField(default='')
+    about = RichTextField(default='')
+    reqmaterial =RichTextField(default='')
+    video = models.CharField(max_length=1000,default='')
+    digram = models.CharField(max_length=1000,default='')
+    code = models.CharField(max_length=1000,default='')
+    process = RichTextField(default='')
+    get = RichTextField(default='')
+    
+    def __str__(self):
+        return self.heading

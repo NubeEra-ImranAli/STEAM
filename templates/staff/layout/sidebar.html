@@ -69,6 +69,21 @@
                     </li>
                 </ul>
             </li>
+
+            <li>
+                <a class="has-arrow " href="javascript:void(0);" aria-expanded="false">
+                    <i class="bi bi-heart"></i>
+                    <span class="nav-text">Lesson</span>
+                </a>
+                <ul aria-expanded="false">
+                    <li>
+                        <a href="{% url 'lesson_list' %}">Lessons List</a>
+                    </li>
+                    <li>
+                        <a href="{% url 'lesson_create' %}">Create Lessons</a>
+                    </li>
+                </ul>
+            </li>
             <a href="{% url 'user-profile' %}" class="" aria-expanded="false">
                 <i class="bi bi-grid"></i>
                 <span class="nav-text">Update Profile</span>
