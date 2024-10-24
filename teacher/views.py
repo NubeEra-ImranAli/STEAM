@@ -9,8 +9,15 @@ from django.core.paginator import Paginator
 from django.http import HttpResponse
 from steamapp.models import User
 from django.db import IntegrityError
-from steamapp.views import check_username
 import csv
+ROMAN_NUMERAL_MAP = {
+                        'V': 5,
+                        'VI': 6,
+                        'VII': 7,
+                        'VIII': 8,
+                        'IX': 9,
+                        'X': 10,
+                    }
 def roman_to_int(roman):
     roman_values = {
         'I': 1, 'V': 5, 'X': 10, 'L': 50, 'C': 100, 'D': 500, 'M': 1000
@@ -148,12 +155,12 @@ def upload_student_csv(request):
 
                     # Fetch or create Grade
                 
-                    gr = MyModels.Grade.objects.get_or_create(grade_name=grade)
+                    gr , created = MyModels.Grade.objects.get_or_create(grade_name=grade)
                     grid = gr.id
 
                     # Fetch or create Division
                     
-                    dv = MyModels.Division.objects.get_or_create(division_name=division)
+                    dv , created  = MyModels.Division.objects.get_or_create(division_name=division)
                     divid = dv.id
 
                     # Ensure username is unique
@@ -200,4 +207,115 @@ def teacher_view_user_list_view(request):
         return render(request,'loginrelated/diffrentuser.html')
 
     
+# Display list of modulequestion
+@login_required
+def modulequestion_list(request):
+    if str(request.session['utype']) == 'teacher':
+        modulequestion = MyModels.ModuleQuestion.objects.all().order_by('grade', 'module')
+        return render(request, 'teacher/modulequestion/modulequestion_list.html', {'modulequestion': modulequestion})
+    else:
+        return render(request,'loginrelated/diffrentuser.html')
+
+# Create a new modulequestion
+@login_required
+def modulequestion_create(request):
+    if str(request.session['utype']) == 'teacher':
+        if request.method == 'POST':
+            grade = request.POST.get('grade')
+            module = request.POST.get('module')
+            question = request.POST['question']
+            option1 = request.POST['option1']
+            option2 = request.POST['option2']
+            option3 = request.POST['option3']
+            option4 = request.POST['option4']
+            answer = request.POST['answer']
+            mode = MyModels.ModuleQuestion.objects.create(grade_id=grade,
+                                                  module_id=module,
+                                                  question = question,
+                                                  option1=option1,
+                                                  option2=option2,
+                                                  option3=option3,
+                                                  option4=option4,
+                                                  answer=answer,
+                                                  marks=1
+                                                  )
+            mode.save()
+            messages.success(request, 'ModuleQuestion created successfully!')
+            return redirect('modulequestion_create')
+        grade = MyModels.Grade.objects.filter(id__isnull=False)\
+                        .values('id','grade_name')
+        grade = sorted(
+                            grade,
+                            key=lambda x: (ROMAN_NUMERAL_MAP.get(x['grade_name'], 0))
+                        )
+        
+        return render(request, 'teacher/modulequestion/modulequestion_create.html',{'grades':grade})
+    else:
+        return render(request,'loginrelated/diffrentuser.html')
+
+# Update an existing modulequestion
+@login_required
+    
+def modulequestion_update(request, id):
+    if str(request.session['utype']) == 'teacher':
+        if request.method == 'POST':
+            grade = request.POST.get('grade')
+            module = request.POST.get('module')
+            question = request.POST['question']
+            option1 = request.POST['option1']
+            option2 = request.POST['option2']
+            option3 = request.POST['option3']
+            option4 = request.POST['option4']
+            answer = request.POST['answer']
+            
+            les = get_object_or_404(MyModels.ModuleQuestion, id=id)
+            les.grade_id = grade
+            les.module = module
+            les.question = question
+            les.option1 = option1
+            les.option2 = option2
+            les.option3 = option3
+            les.option4 = option4
+            les.answer = answer
+            les.save()
+            messages.success(request, 'ModuleQuestion updated successfully!' if id else 'ModuleQuestion created successfully!')
+            return redirect('modulequestion_list')
+
+        grades = MyModels.Grade.objects.filter(id__isnull=False).values('id', 'grade_name')
+        grades = sorted(grades, key=lambda x: (ROMAN_NUMERAL_MAP.get(x['grade_name'], 0)))
+
+        les = get_object_or_404(MyModels.ModuleQuestion, id=id)
+        grade = les.grade_id
+        module = les.module_id
+        question = les.question
+        option1 = les.option1
+        option2 =  les.option2 
+        option3 = les.option3 
+        option4 = les.option4
+        answer = les.answer
+        return render(request, 'teacher/modulequestion/modulequestion_update.html', {
+            'grades': grades,
+            'grade': grade,
+            'module': module,
+            'question' :question,
+            'option1': option1,
+            'option2': option2,
+            'option3': option3,
+            'option4': option4,
+            'answer': answer,
+        })
+    else:
+        return render(request, 'loginrelated/diffrentuser.html')
+
+# Delete a modulequestion
+@login_required
+def modulequestion_delete(request, id):
+    if str(request.session['utype']) == 'teacher':
+        modulequestion = get_object_or_404(MyModels.ModuleQuestion, id=id)
+        # Now delete the modulequestion instance
+        modulequestion.delete()
+        
+        return redirect('modulequestion_list')
+    else:
+        return render(request,'loginrelated/diffrentuser.html')
     

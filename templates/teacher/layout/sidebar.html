@@ -32,11 +32,33 @@
                 </ul>
             </li>
 
+            <li>
+                <a class="has-arrow " href="javascript:void(0);" aria-expanded="false">
+                    <i class="bi bi-heart"></i>
+                    <span class="nav-text">Module Questions</span>
+                </a>
+                <ul aria-expanded="false">
+                    <li>
+                        <a href="{% url 'modulequestion_list' %}">Module Questions List</a>
+                    </li>
+                    <li>
+                        <a href="{% url 'modulequestion_create' %}">Create Module Questions</a>
+                    </li>
+                    
+                </ul>
+            </li>
+
           
             <li>
                 <a href="{% url 'user-profile' %}" class="" aria-expanded="false">
-                    <i class="bi bi-grid"></i>
+                    <i class="fa fa-user"></i>
                     <span class="nav-text">Update Profile</span>
+                </a>
+            </li>
+            <li>
+                <a href="{% url 'user-password' %}" class="" aria-expanded="false">
+                    <i class="fa fa-key"></i>
+                    <span class="nav-text">Change Password</span>
                 </a>
             </li>
             <li>

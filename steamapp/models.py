@@ -113,3 +113,38 @@ class Lesson(models.Model):
     
     def __str__(self):
         return self.heading
+    
+class LessonWatched(models.Model):
+    student = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    grade = models.ForeignKey(Grade, on_delete=models.SET_NULL, null=True)
+    module = models.ForeignKey(Module, on_delete=models.SET_NULL, null=True)
+    lesson = models.ForeignKey(Lesson, on_delete=models.SET_NULL, null=True)
+    
+    
+
+class ModuleQuestion(models.Model):
+    grade = models.ForeignKey(Grade, on_delete=models.SET_NULL, null=True)
+    module = models.ForeignKey(Module, on_delete=models.SET_NULL, null=True)
+    question=RichTextField(default='')
+    option1=RichTextField(default='')
+    option2=RichTextField(default='')
+    option3=RichTextField(default='')
+    option4=RichTextField(default='')
+    cat=(('1','Option1'),('2','Option2'),('3','Option3'),('4','Option4'))
+    answer=models.CharField(max_length=200,choices=cat)
+    marks=models.IntegerField(default=0)
+
+class ModuleResult(models.Model):
+    student=models.ForeignKey(User,on_delete=models.SET_NULL, null=True)
+    grade = models.ForeignKey(Grade, on_delete=models.SET_NULL, null=True)
+    module = models.ForeignKey(Module, on_delete=models.SET_NULL, null=True)
+    marks = models.PositiveIntegerField()
+    wrong = models.PositiveIntegerField()
+    correct = models.PositiveIntegerField()
+    timetaken = models.CharField(max_length=200)
+    date = models.DateTimeField(auto_now=True)
+
+class ModuleResultDetails(models.Model):
+    moduleresult=models.ForeignKey(ModuleResult,on_delete=models.SET_NULL, null=True)
+    question = models.ForeignKey(ModuleQuestion,on_delete=models.SET_NULL, null=True)
+    selected=models.CharField(max_length=200)

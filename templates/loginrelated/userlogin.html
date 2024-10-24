@@ -1,107 +1,95 @@
 <!DOCTYPE html>
-<html lang="en" class="h-100">
-    <!-- Mirrored from getskills.dexignzone.com/xhtml/page-login.html by HTTrack Website Copier/3.x [XR&CO'2014], Tue, 16 May 2023 13:27:24 GMT -->
+<html lang="en">
     <head>
         <meta charset="utf-8">
-        <meta http-equiv="X-UA-Compatible" content="IE=edge">
-        <meta name="keywords" content="">
-        <meta name="author" content="">
-        <meta name="robots" content="">
-        <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta property="og:image" content="social-image.html">
-        <meta name="format-detection" content="telephone=no">
-        <!-- PAGE TITLE HERE -->
-        <title>STEAM Education</title>
-        <!-- FAVICONS ICON -->
-        <link href="/static/get/css/style.css" rel="stylesheet">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
+        <title>Dreams LMS</title>
+        <link rel="shortcut icon" type="image/x-icon" href="/static/drm/img/favicon.svg">
+        <script src="/static/drm/js/theme-script.js" type="39161eece84e35759e215c36-text/javascript"></script>
+        <link rel="stylesheet" href="/static/drm/css/bootstrap.min.css">
+        <link rel="stylesheet" href="/static/drm/plugins/fontawesome/css/fontawesome.min.css">
+        <link rel="stylesheet" href="/static/drm/plugins/fontawesome/css/all.min.css">
+        <link rel="stylesheet" href="/static/drm/css/owl.carousel.min.css">
+        <link rel="stylesheet" href="/static/drm/css/owl.theme.default.min.css">
+        <link rel="stylesheet" href="/static/drm/plugins/feather/feather.css">
+        <link rel="stylesheet" href="/static/drm/css/style.css">
     </head>
-    <body class="body  h-100" style="background-image: url('/static/get/images/log_bg1.jpg'); background-size:cover;">
-        <div class="container h-100">
-            <div class="row h-100 align-items-center justify-contain-center">
-                <div class="col-xl-12 mt-3">
-                    <div class="card">
-                        <div class="card-body p-0">
-                            <div class="row m-0">
-                                <div class="col-xl-7 col-md-6 sign text-center">
-                                    <div>
-                                        <img src="/static/get/images/arduino_bg.jpeg" class="education-img"></img>
-                                    </div>
+    <body class="body  " style="background-image: url('/static/image/login1.png'); background-size:cover;">
+        <div class="main-wrapper log-wrap">
+            <div class="row">
+                <div class="col-md-6 login-wrap-bg">
+                    <div class="login-wrapper">
+                        <div class="loginbox">
+                            <div class="img-logo">
+                                <div class="back-home">
+                                    <a href="{% url 'home' %}">Back to Home</a>
                                 </div>
-                                <div class="col-xl-5 col-md-6">
-                                    <div class="course-content d-flex justify-content-between flex-wrap">
-                                        <div></div>
-                                        <div class="mt-2">
-                                            <a class="btn btn-info" href="{% url 'home' %}">Back to Home</a>
-                                        </div>
-                                        
+                            </div>
+                            <h1>Sign into Your Account</h1>
+                            <div class="sign-in-your">
+                                <span class="fs-20 font-w800 text-red">
+                                    Welcome back! Login with your data that you entered during registration
+                                </span>
+                                <form method="post">
+                                    {% csrf_token %}
+                                    <div class="mb-3">
+                                        <label class="mb-1">
+                                            <strong class="fs-20 font-w800 text-red">User Name</strong>
+                                        </label>
+                                        <input
+                                            name="username"
+                                            id="username"
+                                            type="text"
+                                            class="form-control"
+                                            placeholder="Enter your user name"
+                                            required
+                                        >
                                     </div>
-                                    <div class="sign-in-your">
-                                        <h4 class="fs-20 font-w800 text-red text-center">Sign in your account</h4>
-                                        <span class="fs-20 font-w800 text-red">
-                                            Welcome back! Login with your data that you entered during registration
-                                        </span>
-                                        <form method="post">
-                                            {% csrf_token %}
-                                            <div class="mb-3">
-                                                <label class="mb-1">
-                                                    <strong class="fs-20 font-w800 text-red">User Name</strong>
-                                                </label>
-                                                <input
-                                                    name="username"
-                                                    id="username"
-                                                    type="text"
-                                                    class="form-control"
-                                                    placeholder="Enter your user name"
-													required
-                                                >
-                                            </div>
-                                            <div class="mb-3">
-                                                <label class="mb-1">
-                                                    <strong class="fs-20 font-w800 text-red">Password</strong>
-                                                </label>
-                                                <input
-                                                    name="password"
-                                                    id="password"
-                                                    type="password"
-                                                    class="form-control"
-                                                    placeholder="Enter your password"
-													required
-                                                >
-                                            </div>
-                                            <div class="text-center">
-                                                <button type="submit" class="btn btn-primary btn-block">Sign Me In</button>
-                                            </div>
-                                        </form>
-										{% if error_message %}
-                                        <div class="alert alert-success" id="success-message">{{ error_message }}</div>
-                                        {% endif %}
-                                        <script>
-    // Wait for the DOM to load
-    document.addEventListener("DOMContentLoaded", function() {
-        // Select the success message
-        var message = document.getElementById("success-message");
-        if (message) {
+                                    <div class="mb-3">
+                                        <label class="mb-1">
+                                            <strong class="fs-20 font-w800 text-red">Password</strong>
+                                        </label>
+                                        <input
+                                            name="password"
+                                            id="password"
+                                            type="password"
+                                            class="form-control"
+                                            placeholder="Enter your password"
+                                            required
+                                        >
+                                    </div>
+                                    <div class="text-center">
+                                        <button type="submit" class="btn btn-primary btn-block">Sign Me In</button>
+                                    </div>
+                                </form>
+                                {% if error_message %}
+                                <div class="alert alert-success" id="success-message">{{ error_message }}</div>
+                                {% endif %}
+                                <script>
+            // Wait for the DOM to load
+            document.addEventListener("DOMContentLoaded", function() {
+            // Select the success message
+            var message = document.getElementById("success-message");
+            if (message) {
             // Set a timer to hide the message after 5 seconds (5000 ms)
             setTimeout(function() {
-                message.style.display = 'none';
+            message.style.display = 'none';
             }, 5000);
-        }
-    });
-                                        </script>
-                                    </div>
-                                </div>
+            }
+            });
+                                </script>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-        <!--**********************************
-        Scripts
-    ***********************************-->
-        <!-- Required vendors -->
-        <script src="/static/get/vendor/global/global.min.js"></script>
-        <script src="/static/get/js/custom.js"></script>
-    </body>
-    <!-- Mirrored from getskills.dexignzone.com/xhtml/page-login.html by HTTrack Website Copier/3.x [XR&CO'2014], Tue, 16 May 2023 13:27:24 GMT -->
+    </div>
+</div>
+<script src="/static/drm/js/jquery-3.7.1.min.js" type="39161eece84e35759e215c36-text/javascript"></script>
+<script src="/static/drm/js/bootstrap.bundle.min.js" type="39161eece84e35759e215c36-text/javascript"></script>
+<script src="/static/drm/js/owl.carousel.min.js" type="39161eece84e35759e215c36-text/javascript"></script>
+<script src="/static/drm/js/script.js" type="39161eece84e35759e215c36-text/javascript"></script>
+<script src="/cdn-cgi/scripts/7d0fa10a/cloudflare-static/rocket-loader.min.js" data-cf-settings="39161eece84e35759e215c36-|49" defer></script>
+</body>
 </html>

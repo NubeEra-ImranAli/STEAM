@@ -29,6 +29,7 @@ urlpatterns = [
     
     path('indexpage/', views.afterlogin_view,name='indexpage'),   
     path('user-profile/', views.user_profile,name='user-profile'),   
+    path('user-password/', views.user_password,name='user-password'),   
     path('user-session-expired', views.session_expire_view,name='user-session-expired'),
     path('admin-view-user-log-details/<int:user_id>', views.admin_view_user_log_details_view,name='admin-view-user-log-details'),
     path('admin-view-user-activity-details/<int:user_id>', views.admin_view_user_activity_details_view,name='admin-view-user-activity-details'),
@@ -41,6 +42,7 @@ urlpatterns = [
     path('userlogin/', views.user_login,name='userlogin'),
     path('register', LoginView.as_view(template_name='loginrelated/register.html'),name='register'),
     path('user-change-password', views.user_change_password_view,name='user-change-password'),
+    path('reset-user/<int:user_id>/', views.reset_user_password,name='reset-user'),
 
     
 ]

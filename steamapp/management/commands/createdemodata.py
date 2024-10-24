@@ -73,3 +73,26 @@ class Command(BaseCommand):
             ).save()
 
         self.stdout.write(self.style.SUCCESS('Divisions created successfully...'))
+
+        self.stdout.write(self.style.NOTICE('Creating Modules...'))
+        for i in range (5):
+            MyModels.Module.objects.create(
+                grade_id = 1,
+                module_name = f'Module {i}',
+                description = f'Description {i}',
+            ).save()
+        
+        for i in range (5):
+            MyModels.Module.objects.create(
+                grade_id = 2,
+                module_name = f'Module {i + 50}',
+                description = f'Description {i+50}',
+            ).save()
+
+        for i in range (5):
+            MyModels.Module.objects.create(
+                grade_id = 3,
+                module_name = f'Module {i + 100}',
+                description = f'Description {i+100}',
+            ).save()
+        self.stdout.write(self.style.SUCCESS('Module created successfully...'))

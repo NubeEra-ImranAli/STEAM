@@ -23,6 +23,8 @@ from django.http import JsonResponse
 from django.contrib.auth import authenticate, login as userlogin
 from django.db import IntegrityError
 from django.core.files.storage import default_storage
+from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import csrf_exempt
 
 ROMAN_NUMERAL_MAP = {
                         'V': 5,
@@ -178,6 +180,19 @@ def user_change_password_view(request):
     except:
         return render(request,'loginrelated/diffrentuser.html')
 
+@require_POST
+@csrf_exempt
+def reset_user_password(request, user_id):
+    print('entered')
+    try:
+        user = User.objects.get(id=user_id)
+        # Logic to reset the user's password
+        user.set_password('steam123')  # Replace with your password logic
+        user.profile_updated = False
+        user.save()
+        return JsonResponse({'success': True})
+    except User.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'User not found'})
 @login_required
 def home(request):
     if request.user.is_authenticated:
@@ -286,13 +301,27 @@ def user_dashboard_view(request):
         }
         return render(request,'principle/principle_dashboard.html',context=dict)
     elif str(request.session['utype']) == 'student':
+            total_lessons = MyModels.Lesson.objects.filter(
+                        module__grade__user__id=request.user.id,
+                        module__grade__user__grade_id=request.user.grade.id,
+                        module__grade__user__school_id=request.user.school.id,
+                        module__grade_id=request.user.grade.id
+                        ).count()
+                        
+            watched_lessons = MyModels.LessonWatched.objects.filter(
+                            student=request.user,
+                            grade=request.user.grade
+                            ).count()
+
+            watched_percentage = 0
+            # Calculate the percentage of watched lessons
+            if total_lessons > 0:  # Avoid division by zero
+                watched_percentage = (watched_lessons / total_lessons) * 100
+        
             dict={
-            'total_course':0,
-            'total_exam':0,
-            'total_shortExam':0, 
-            'total_question':0,
-            'total_short':0,
-            'total_learner':0,
+            'total_lessons': total_lessons,
+            'watched_lessons': watched_lessons,
+            'watched_percentage':watched_percentage
             }
             return render(request,'student/student_dashboard.html',context=dict)
     elif str(request.session['utype']) == 'teacher':
@@ -366,6 +395,33 @@ def user_profile(request):
         return redirect('user-profile') 
 
     return render(request,'steamapp/users/user_profile.html')
+
+
+@login_required
+def user_password(request):
+    if request.method == 'POST':
+        user = User.objects.get(id = request.user.id)
+        
+        old_password = request.POST['old_password']
+        password = request.POST['confirm_password']
+        password1 = request.POST['new_password']
+            
+            
+        if user.check_password(old_password):
+            if password != password1:
+                messages.warning(request, 'New password and confirm password does not matched')
+                return redirect('user-password') 
+            user.set_password(password)
+            user.profile_updated = True  
+            user.save()
+            update_session_auth_hash(request, user)
+            messages.success(request, 'Password Updated')
+
+        else:
+            messages.warning(request, 'invalid old password')
+        return redirect('user-password') 
+
+    return render(request,'steamapp/users/user_password.html')
 
 @login_required
 def admin_view_user_list_view(request):

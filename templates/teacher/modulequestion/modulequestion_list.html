@@ -1,0 +1,89 @@
+{% extends 'teacher/teacherbase.html' %}
+{% block content %}
+{% load static %}
+<link rel="stylesheet" href="/static/get/css/style.css">
+<style>
+  ol.breadcrumb li+li:before {
+    content: '\f061';
+  display: inline-block;
+  font-family: 'fontAwesome';
+  padding: 0 10px;
+  }
+</style>
+<div>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li>
+                <a href="{% url 'user-dashboard' %}">Dashboard</a>
+            </li>
+            <li>
+                <a href="{% url 'modulequestion_create' %}">New Module Question</a>
+            </li>
+            <li aria-current="page">View Module Questions</li>
+           
+        </ol>
+    </nav>
+</div>
+{% if messages %}
+    {% for message in messages %}
+<div class="alert alert-info" id="success-message">{{ message }}</div>
+{% endfor %}
+{% endif %}
+<script>
+    // Wait for the DOM to load
+    document.addEventListener("DOMContentLoaded", function() {
+        // Select the success message
+        var message = document.getElementById("success-message");
+        if (message) {
+            // Set a timer to hide the message after 5 seconds (5000 ms)
+            setTimeout(function() {
+                message.style.display = 'none';
+            }, 5000);
+        }
+    });
+</script>
+<div class="card">
+    <div class="table-responsive">
+<table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+    <thead>
+        <tr>
+            <th>Grade</th>
+            <th>Module</th>
+            <th>Question</th>
+            <th>Option 1</th>
+            <th>Option 2</th>
+            <th>Option 3</th>
+            <th>Option 4</th>
+            <th>Right Answer</th>
+            <th>Update</th>
+            <th>Delete</th>
+        </tr>
+    </thead>
+    <tbody >
+        {% for mod in modulequestion %}
+            <td>{{ mod.grade }}</td>
+            <td>{{ mod.module }}</td>
+            <td>{{ mod.question|safe }}</td>
+            <td>{{ mod.option1|safe}}</td>
+            <td>{{ mod.option2|safe}}</td>
+            <td>{{ mod.option3|safe}}</td>
+            <td>{{ mod.option4|safe}}</td>
+            <td>{{ mod.answer|safe}}</td>
+            <td>
+                <a class="btn btn-primary btn-xs" href="{% url 'modulequestion_update' mod.id %}">
+                    <span class="far fa-edit"></span>
+                </a>
+            </td>
+            <td>
+                <a class="btn btn-danger btn-xs" href="{% url 'modulequestion_delete' mod.id %}" onclick="return confirm('Are you sure?')">
+                    <span class="far fa-trash-alt"></span>
+                </a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+    </div>
+</div>
+{% endblock content %}
