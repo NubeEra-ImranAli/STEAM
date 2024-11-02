@@ -97,18 +97,6 @@
                                     aria-label="Student ID: activate to sort column ascending"
                                     style="width: 180.828px;"
                                 >Division</th>
-                                
-                                <th
-                                    class="sorting"
-                                    tabindex="0"
-                                    aria-controls="application-tbl1"
-                                    rowspan="1"
-                                    colspan="1"
-                                    aria-label="Join Date: activate to sort column ascending"
-                                    style="width: 221.562px;"
-                                >Mobile / WhatsApp</th>
-                                
-                            </tr>
                         </thead>
                         <tbody>
                             {% for t in users %}
@@ -127,21 +115,7 @@
                                 <td>{{t.grade}}</td>
                                 <td>{{t.division}}</td>
                                 
-                                <td>
-                                    {% if t.profile_updated %}
-                                    <h4 class="text-info">
-                                        <span>{{ t.mobile }}</span>
-                                        / {{ t.whatsappno }}
-                                    </h4>
-                                    {% else %}
-                                    <h4 class="text-danger">
-                                        <span>Profile not updated yet..</span>
-                                    </h4>
-                                    {% endif %}
-                                </td>
-                                
-                                
-                            </tr>
+                                </tr>
                             {% endfor %}
                         </tbody>
                     </table>

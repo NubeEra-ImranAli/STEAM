@@ -205,16 +205,27 @@
               {% for lesson in lessons %}
               <div class="acc-courses">
                 <div class="d-flex justify-content-between align-items-center">
-                  <h4
-                    class="m-0 lesson-heading"
-                    data-lesson-id="{{ lesson.id }}"
-                  >
+                  <h4 class="m-0 lesson-heading" data-lesson-id="{{ lesson.id }}">
                     {{ lesson.heading }}
                   </h4>
                   <span>{{ lesson.serialno }}</span>
                 </div>
               </div>
               {% endfor %}
+              
+              <!-- Separate heading for Exam availability -->
+              {% with last_lesson=lessons|last %}
+              {% if last_lesson.has_ques %}
+                  <div class="acc-courses">
+                      <div class="d-flex justify-content-between align-items-center">
+                          <h4 class="m-0 lesson-heading exam-heading" data-lesson-id="{{ last_lesson.id }}">
+                              Exam
+                          </h4>
+                      </div>
+                  </div>
+              {% endif %}
+              {% endwith %}
+              <div id="questions-container" class="mt-3"></div>
             </div>
           </div>
         </div>
@@ -310,6 +321,82 @@
       },
     });
   });
+   // Handle exam heading click
+    $(".exam-heading").on("click", function () {
+      var lessonId = $(this).data("lesson-id");
+      var url = "{% url 'get-module-questions' 0 %}".replace("0", lessonId);
+      
+      $.ajax({
+        url: url,
+        method: "GET",
+        success: function (data) {
+          displayModuleQuestions(data.questions);
+        },
+        error: function (xhr, status, error) {
+          console.error("Error fetching module questions:", error);
+        },
+      });
+    });
+
+    // Function to display questions
+    function displayModuleQuestions(questions) {
+      debugger;
+    var questionsContainer = $("#questions-container");
+    questionsContainer.empty();
+
+    // Check if questions is defined and is an array
+    if (Array.isArray(questions) && questions.length > 0) {
+        questions.forEach(function (question) {
+            questionsContainer.append(
+                "<div class='question-item'>" +
+                "<h5>" + question.question|safe + "</h5>" +
+                "<ul>" +
+                "<li>" + question.option1|safe + "</li>" +
+                "<li>" + question.option2|safe + "</li>" +
+                "<li>" + question.option3|safe + "</li>" +
+                "<li>" + question.option4|safe + "</li>" +
+                "</ul>" +
+                "</div>"
+            );
+        });
+    } else {
+        // Handle case where there are no questions
+        questionsContainer.append("<p>No questions available for this exam.</p>");
+    }
+}
+// Handle exam heading click
+    $(".exam-heading").on("click", function () {
+      var lessonId = $(this).data("lesson-id");
+      var url = "{% url 'get-module-questions' 0 %}".replace("0", lessonId);
+      
+      $.ajax({
+        url: url,
+        method: "GET",
+        success: function (data) {
+          displayModuleQuestions(data.questions);
+        },
+        error: function (xhr, status, error) {
+          console.error("Error fetching module questions:", error);
+        },
+      });
+    });
+
+    // Function to display questions
+    function displayModuleQuestions(questions) {
+      var questionsContainer = $("#questions-container");
+      questionsContainer.empty();
+      if (questions.length > 0) {
+        questions.forEach(function (question) {
+          questionsContainer.append(
+            "<div class='question-item'>" +
+            "<h5>" + question.question_text + "</h5>" +
+            "</div>"
+          );
+        });
+      } else {
+        questionsContainer.append("<p>No questions available for this exam.</p>");
+      }
+    }
 
     function updateProgressBar(lessonId) {
       // Make another AJAX request to update the progress bar

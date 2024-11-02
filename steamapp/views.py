@@ -282,6 +282,8 @@ def user_dashboard_view(request):
         'total_principles_pending':   models.User.objects.exclude(id=None).filter(utype = 'principle', status = False).count(),
         'total_teachers':   models.User.objects.exclude(id=None).filter(utype = 'teacher', status = True).count(),
         'total_teachers_pending':   models.User.objects.exclude(id=None).filter(utype = 'teacher', status = False).count(),
+        'total_students':   models.User.objects.exclude(id=None).filter(utype = 'student', status = True).count(),
+        'total_students_pending':   models.User.objects.exclude(id=None).filter(utype = 'student', status = False).count(),
         'school_student':school_student,
         'school_student_count':school_student_count,
         'labels': json.dumps(labels),  # Pass labels as JSON

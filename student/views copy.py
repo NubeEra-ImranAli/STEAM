@@ -3,19 +3,40 @@ from django.contrib.auth.decorators import login_required
 from steamapp import models as MyModels
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from django.db.models import Exists, OuterRef, Value, CharField, Case, When
 
 # Display list of modules
 @login_required
 def studykit(request):
     if str(request.session['utype']) == 'student':
-        lessons = MyModels.Lesson.objects.filter(
+        # Create a subquery to check if the lesson has been watched
+        watched_lessons_subquery = MyModels.LessonWatched.objects.filter(
+            lesson=OuterRef('id'),
+            student=request.user
+        )
+        
+        # Get the lessons for the user, including the watched_status
+        lessons = list(MyModels.Lesson.objects.filter(
             module__grade__user__id=request.user.id,
             module__grade__user__grade_id=request.user.grade.id,
             module__grade__user__school_id=request.user.school.id,
             module__grade_id=request.user.grade.id
-        ).distinct().values(
-            'id', 'module__id', 'module__module_name', 'heading'  # Only fetch lesson ID, module ID, module name, and heading
-        ).order_by('module__module_name', 'serialno')
+        ).distinct().annotate(
+            watched_status=Exists(watched_lessons_subquery)  # Check if the lesson has been watched
+        ).values(
+            'id', 
+            'module__id', 
+            'module__module_name', 
+            'heading',
+            'watched_status'  # Include watched_status in the values
+        ).order_by('module__module_name', 'serialno'))
+
+        # Set the watched status display
+        for i, lesson in enumerate(lessons):
+            if i == 0:  # First lesson in the list
+                lesson['watched_status_display'] = 'YES'
+            else:
+                lesson['watched_status_display'] = 'YES' if lesson['watched_status'] else 'NO'
         total_lessons = MyModels.Lesson.objects.filter(
             module__grade__user__id=request.user.id,
             module__grade__user__grade_id=request.user.grade.id,

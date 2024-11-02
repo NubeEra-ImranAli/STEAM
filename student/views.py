@@ -14,6 +14,10 @@ def studykit(request):
             lesson=OuterRef('id'),
             student=request.user
         )
+        has_question_subquery = MyModels.ModuleQuestion.objects.filter(
+            module=OuterRef('module__id')
+        )
+
         # Get the lessons for the user, including the watched_status
         lessons = list(MyModels.Lesson.objects.filter(
             module__grade__user__id=request.user.id,
@@ -21,13 +25,15 @@ def studykit(request):
             module__grade__user__school_id=request.user.school.id,
             module__grade_id=request.user.grade.id
         ).distinct().annotate(
-            watched_status=Exists(watched_lessons_subquery)  # Check if the lesson has been watched
+            watched_status=Exists(watched_lessons_subquery),  # Check if the lesson has been watched
+            has_ques=Exists(has_question_subquery)
         ).values(
             'id', 
             'module__id', 
             'module__module_name', 
             'heading',
-            'watched_status'  # Include watched_status in the values
+            'watched_status',  # Include watched_status in the values
+            'has_ques'
         ).order_by('module__module_name', 'serialno'))
 
         # Set the watched status display
@@ -68,7 +74,19 @@ def studykit(request):
     else:
         return render(request,'loginrelated/diffrentuser.html')
 
-
+def get_module_questions(request, lesson_id):
+    # Fetch questions based on the lesson_id or any criteria you need
+    module_id = MyModels.Lesson.objects.filter(id=lesson_id).values('module_id')[0]['module_id']
+    questions = MyModels.ModuleQuestion.objects.filter(module_id=module_id)  # Adjust filtering as needed
+    questions_data = [{"id": q.id, "question": q.question,
+                       "option1": q.option1,
+                       "option2": q.option2,
+                       "option3": q.option3,
+                       "option4": q.option4,
+                       
+                       } for q in questions]
+    
+    return JsonResponse({"questions": questions_data})
 # View to return full lesson details (for AJAX)
 @login_required
 def get_lesson_details(request, lesson_id):
