@@ -3,7 +3,8 @@ from django.contrib.auth.decorators import login_required
 from steamapp import models as MyModels
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.db.models import Exists, OuterRef, Value, CharField, Case, When
+from django.db.models import Exists, OuterRef
+import json
 
 # Display list of modules
 @login_required
@@ -83,7 +84,9 @@ def get_module_questions(request, lesson_id):
                        "option2": q.option2,
                        "option3": q.option3,
                        "option4": q.option4,
-                       
+                       "answer": q.answer,
+                       "module_id":module_id,
+                       "grade_id":q.grade_id,
                        } for q in questions]
     
     return JsonResponse({"questions": questions_data})
@@ -148,3 +151,88 @@ def save_lesson_watched(request):
         })
 
     return JsonResponse({'success': False}, status=400)
+
+@csrf_exempt
+def submit_quiz_results(request):
+    if request.method == 'POST':
+        try:
+            # Load the JSON data from the request
+            data = json.loads(request.body)
+            results = []
+
+            total_correct = 0
+            total_questions = len(data)
+            total_marks = 0
+            
+            module_id = data[0]['moduleID']  # Get the first moduleID
+            grade_id = data[0]['gradeID']      # Get the first gradeID
+            saveresult = MyModels.ModuleResult.objects.create(
+                student_id = request.user.id,
+                grade_id = grade_id,
+                module_id = module_id,
+                marks = 0,
+                wrong = 0,
+                correct =0
+            )
+            saveresult.save()
+            # Process each submitted answer
+            for result in data:
+                question_id = result.get('questionID')
+                given_answer = result.get('givenAnswer')
+
+                # Fetch the question from the database
+                question = MyModels.ModuleQuestion.objects.filter(id=question_id).first()
+                
+                if question:
+                    saveresultdet = MyModels.ModuleResultDetails.objects.create(
+                        moduleresult = saveresult,
+                        question = question,
+                        selected = given_answer
+                    )
+                    saveresultdet.save()
+                    # Check if the given answer matches the correct answer
+                    if given_answer == question.answer:
+                        total_correct += 1
+                        total_marks += question.marks
+                        results.append({
+                            'questionID': question.question,
+                            'givenAnswer': given_answer,
+                            'result': 'Correct'
+                        })
+                    else:
+                        results.append({
+                            'questionID': question.question,
+                            'givenAnswer': given_answer,
+                            'result': 'Incorrect'
+                        })
+                else:
+                    results.append({
+                        'questionID': question.question,
+                        'givenAnswer': given_answer,
+                        'result': 'Question not found'
+                    })
+            # Calculate the percentage of correct answers
+            if total_questions > 0:
+                percentage = (total_correct / total_questions) * 100
+            else:
+                percentage = 0  # Handle division by zero if no questions
+
+            # Prepare the response data
+            saveresult.wrong = total_questions - total_correct
+            saveresult.correct = total_correct
+            saveresult.marks = total_marks
+            saveresult.save()
+            response_data = {
+                'status': 'success',
+                'totalCorrect': total_correct,
+                'totalQuestions': total_questions,
+                'percentage': round(percentage, 2),  # Round to 2 decimal places
+                'results': results
+            }
+
+            return JsonResponse(response_data, status=200)
+
+        except json.JSONDecodeError:
+            return JsonResponse({'status': 'error', 'message': 'Invalid JSON data.'}, status=400)
+    else:
+        return JsonResponse({'status': 'error', 'message': 'Only POST requests are allowed.'}, status=405)
