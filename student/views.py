@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from steamapp import models as MyModels
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.db.models import Exists, OuterRef
+from django.db.models import Exists, OuterRef,Case, When, Value, IntegerField,F
 import json
 
 # Display list of modules
@@ -43,6 +43,8 @@ def studykit(request):
                 lesson['watched_status_display'] = 'YES'
             else:
                 lesson['watched_status_display'] = 'YES' if lesson['watched_status'] else 'NO'
+        
+        
         total_lessons = MyModels.Lesson.objects.filter(
             module__grade__user__id=request.user.id,
             module__grade__user__grade_id=request.user.grade.id,
@@ -75,10 +77,11 @@ def studykit(request):
     else:
         return render(request,'loginrelated/diffrentuser.html')
 
+@login_required
 def get_module_questions(request, lesson_id):
     # Fetch questions based on the lesson_id or any criteria you need
     module_id = MyModels.Lesson.objects.filter(id=lesson_id).values('module_id')[0]['module_id']
-    questions = MyModels.ModuleQuestion.objects.filter(module_id=module_id)  # Adjust filtering as needed
+    questions = MyModels.ModuleQuestion.objects.filter(module_id=module_id).order_by('?')  # Adjust filtering as needed
     questions_data = [{"id": q.id, "question": q.question,
                        "option1": q.option1,
                        "option2": q.option2,
@@ -179,7 +182,8 @@ def submit_quiz_results(request):
             for result in data:
                 question_id = result.get('questionID')
                 given_answer = result.get('givenAnswer')
-
+                if given_answer == None:
+                    given_answer= 'Not Attempted'
                 # Fetch the question from the database
                 question = MyModels.ModuleQuestion.objects.filter(id=question_id).first()
                 
@@ -236,3 +240,60 @@ def submit_quiz_results(request):
             return JsonResponse({'status': 'error', 'message': 'Invalid JSON data.'}, status=400)
     else:
         return JsonResponse({'status': 'error', 'message': 'Only POST requests are allowed.'}, status=405)
+
+
+@login_required
+def module_exams(request):
+    if str(request.session['utype']) == 'student':
+        modules = MyModels.ModuleResult.objects.filter(student_id=request.user.id,grade_id = request.user.grade_id ).values(
+        'module__module_name','module__id'
+    ).distinct()
+        return render(request, 'student/studykit/exam_modules.html', 
+                      {'modules': modules
+                       })
+    else:
+        return render(request,'loginrelated/diffrentuser.html')
+
+@login_required
+def show_module_exams_attemps(request,module_id):
+    if str(request.session['utype']) == 'student':
+        modules = MyModels.ModuleResult.objects.filter(module_id= module_id, student_id=request.user.id,grade_id = request.user.grade_id ).values(
+        'module__module_name','module__id','marks','wrong','correct','date','id'
+    )
+        return render(request, 'student/studykit/show_exam_modules_attempt.html', 
+                      {'modules': modules
+                       })
+    else:
+        return render(request,'loginrelated/diffrentuser.html')
+    
+@login_required
+def show_module_result(request,result_id):
+    if str(request.session['utype']) == 'student':
+        results = (
+        MyModels.ModuleResultDetails.objects
+        .filter(moduleresult_id=result_id)
+        .select_related('question')  # Use select_related to optimize the join
+        .annotate(
+            marks=Case(
+                When(question__answer=F('selected'), then=F('question__marks')),
+                default=Value(0),
+                output_field=IntegerField(),
+            )
+        )
+        .distinct()
+        .values(
+            'question__question',
+            'question__option1',
+            'question__option2',
+            'question__option3',
+            'question__option4',
+            'selected',
+            'question__answer',
+            'marks'
+        )
+    )
+        return render(request, 'student/studykit/show_exam_modules_result.html', 
+                      {'results': results
+                       })
+    else:
+        return render(request,'loginrelated/diffrentuser.html')

@@ -1,0 +1,92 @@
+{% extends 'student/studentbase.html' %} {% block content %} {% load static %}
+<link rel="stylesheet" href="/static/get/css/style.css" />
+<style>
+  ol.breadcrumb li + li:before {
+    content: "\f061";
+    display: inline-block;
+    font-family: "fontAwesome";
+    padding: 0 10px;
+  }
+  #player {
+    display: none;
+  }
+</style>
+<div>
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li>
+        <a href="{% url 'user-dashboard' %}">Dashboard</a>
+      </li>
+      <li aria-current="page">View Module Exam Attempts</li>
+    </ol>
+  </nav>
+</div>
+
+{% if messages %} {% for message in messages %}
+<div class="alert alert-info" id="success-message">{{ message }}</div>
+{% endfor %} {% endif %}
+
+<script>
+  // Wait for the DOM to load
+  document.addEventListener("DOMContentLoaded", function () {
+    // Select the success message
+    var message = document.getElementById("success-message");
+    if (message) {
+      // Set a timer to hide the message after 5 seconds (5000 ms)
+      setTimeout(function () {
+        message.style.display = "none";
+      }, 5000);
+    }
+  });
+</script>
+
+<div class="card">
+  <div class="table-responsive">
+    <table
+      class="table table-bordered"
+      id="dataTable"
+      width="100%"
+      cellspacing="0"
+    >
+      <thead>
+        <tr>
+          <th>Question</th>
+          <th>Option 1</th>
+          <th>Option 2</th>
+          <th>Option 3</th>
+          <th>Option 4</th>
+          <th>Given Answer</th>
+          <th>Right Answer</th>
+          <th>Status</th>
+          <th>Marks</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for ques in results %}
+        
+        {% if ques.selected == ques.question__answer %}
+        <tr style="background-color: lightgreen;">
+        {% else %}
+        <tr style="background-color: lightcoral;">
+        {% endif %}
+          <td>{{ques.question__question|safe}}</td>
+          <td>{{ques.question__option1|safe}}</td>
+          <td>{{ques.question__option2|safe}}</td>
+          <td>{{ques.question__option3|safe}}</td>
+          <td>{{ques.question__option4|safe}}</td>
+          <td>{{ques.selected}}</td>
+          <td>{{ques.question__answer}}</td>
+          {% if ques.selected == ques.question__answer %}
+          <td>Correct</td>
+          {% else %}
+          <td>Wrong</td>
+          {% endif %}
+          <td>{{ques.marks}}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+{% endblock %}

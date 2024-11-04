@@ -1,0 +1,79 @@
+{% extends 'student/studentbase.html' %} {% block content %} {% load static %}
+<link rel="stylesheet" href="/static/get/css/style.css" />
+<style>
+  ol.breadcrumb li + li:before {
+    content: "\f061";
+    display: inline-block;
+    font-family: "fontAwesome";
+    padding: 0 10px;
+  }
+  #player {
+    display: none;
+  }
+</style>
+<div>
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li>
+        <a href="{% url 'user-dashboard' %}">Dashboard</a>
+      </li>
+      <li aria-current="page">View Module Exam Results</li>
+    </ol>
+  </nav>
+</div>
+
+{% if messages %} {% for message in messages %}
+<div class="alert alert-info" id="success-message">{{ message }}</div>
+{% endfor %} {% endif %}
+
+<script>
+  // Wait for the DOM to load
+  document.addEventListener("DOMContentLoaded", function () {
+    // Select the success message
+    var message = document.getElementById("success-message");
+    if (message) {
+      // Set a timer to hide the message after 5 seconds (5000 ms)
+      setTimeout(function () {
+        message.style.display = "none";
+      }, 5000);
+    }
+  });
+</script>
+
+<div class="card">
+  {% if modules %}
+  <div class="table-responsive">
+    <table
+      class="table table-bordered"
+      id="dataTable"
+      width="100%"
+      cellspacing="0"
+    >
+      <thead>
+        <tr>
+          <th>Module Name</th>
+          <th>Show</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for module in modules %}
+        <tr>
+          <td>{{module.module__module_name}}</td>
+          <td>
+            <a
+              class="btn btn-primary btn-xs"
+              href="{% url 'show-module-exams-attempts' module.module__id %}"
+              ><span class="far fa-eye"></span
+            ></a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p>There are no exam attempted yet</p>
+  {% endif %}
+</div>
+
+{% endblock %}

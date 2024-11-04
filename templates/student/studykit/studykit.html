@@ -10,6 +10,13 @@
   #player {
     display: none;
   }
+  /* .question-item h5 {
+    font-size: 32px; 
+  }
+
+  .form-check-label {
+    font-size: 28px; 
+  } */
 </style>
 <div>
   <nav aria-label="breadcrumb">
@@ -182,7 +189,9 @@
             </div>
           </div>
         </div>
-
+        <div id="result-generating" style="display: none; text-align: center">
+          <h4>Generating results, please wait...</h4>
+        </div>
         <div id="questions-details" class="card-body">
           <div id="questions-container" class="mt-3"></div>
           <canvas id="resultsChart"></canvas>
@@ -217,29 +226,68 @@
               {% for lesson in lessons %}
               <div class="acc-courses">
                 <div class="d-flex justify-content-between align-items-center">
-                  <h4
-                    class="m-0 lesson-heading"
-                    data-lesson-id="{{ lesson.id }}"
+                  <div class="d-flex align-items-center">
+                    <span class="acc-icon">
+                      {% if lesson.watched_status_display == 'YES' %}
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M4 13C3.817 13 3.635 12.95 3.474 12.851C3.32918 12.7611 3.20965 12.6358 3.12671 12.4869C3.04378 12.338 3.00016 12.1704 3 12V4C3 3.653 3.18 3.331 3.474 3.149C3.61914 3.05976 3.7846 3.00891 3.95481 3.00121C4.12502 2.99351 4.29439 3.02923 4.447 3.105L12.447 7.105C12.6131 7.1882 12.7528 7.31599 12.8504 7.47405C12.948 7.63212 12.9997 7.81423 12.9997 8C12.9997 8.18578 12.948 8.36789 12.8504 8.52595C12.7528 8.68402 12.6131 8.8118 12.447 8.895L4.447 12.895C4.307 12.965 4.152 13 4 13Z" fill="var(--primary)"></path>
+                      </svg>
+                    </span>	
+                    <h4
+                    class="m-0"
                   >
-                    {{ lesson.heading }}
-                  </h4>
-                  <span>{{ lesson.serialno }}</span>
+                  {% else %}
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M11.3337 6V4.66666C11.3337 2.79999 9.86699 1.33333 8.00033 1.33333C6.13366 1.33333 4.66699 2.79999 4.66699 4.66666V6C3.53366 6 2.66699 6.86666 2.66699 8V12.6667C2.66699 13.8 3.53366 14.6667 4.66699 14.6667H11.3337C12.467 14.6667 13.3337 13.8 13.3337 12.6667V8C13.3337 6.86666 12.467 6 11.3337 6ZM6.00033 4.66666C6.00033 3.53333 6.86699 2.66666 8.00033 2.66666C9.13366 2.66666 10.0003 3.53333 10.0003 4.66666V6H6.00033V4.66666ZM8.66699 11.3333C8.66699 11.7333 8.40033 12 8.00033 12C7.60033 12 7.33366 11.7333 7.33366 11.3333V9.33333C7.33366 8.93333 7.60033 8.66666 8.00033 8.66666C8.40033 8.66666 8.66699 8.93333 8.66699 9.33333V11.3333Z" fill="#374557"></path>
+                  </svg>
+                  </span>	
+                  <h4
+                  class="m-0 lesson-heading"
+                  data-lesson-id="{{ lesson.id }}"
+
+                >
+                  {% endif %}
+                  {{ lesson.heading }}</h4>
+
+                  
+                  </div>	
                 </div>
               </div>
               {% endfor %}
 
               <!-- Separate heading for Exam availability -->
-              {% with last_lesson=lessons|last %} {% if last_lesson.has_ques %}
+              {% with last_lesson=lessons|last %} 
+              {% if last_lesson.has_ques and last_lesson.watched_status_display == 'YES' %}
+
               <div class="acc-courses">
                 <div class="d-flex justify-content-between align-items-center">
-                  <h4
+                  <div class="d-flex align-items-center">
+                    <span class="acc-icon">
+                      
+                      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="2" y="2" width="12" height="12" fill="white" stroke="var(--primary)" stroke-width="1"/>
+                        <line x1="3" y1="4" x2="13" y2="4" stroke="var(--primary)" stroke-width="0.5"/>
+                        <line x1="3" y1="6" x2="13" y2="6" stroke="var(--primary)" stroke-width="0.5"/>
+                        <line x1="3" y1="8" x2="13" y2="8" stroke="var(--primary)" stroke-width="0.5"/>
+                        <line x1="3" y1="10" x2="13" y2="10" stroke="var(--primary)" stroke-width="0.5"/>
+                        <line x1="3" y1="12" x2="8" y2="12" stroke="var(--primary)" stroke-width="0.5"/>
+                        
+                        <path d="M10 1L11.5 2.5L5 9L4 10.5L3.5 11.5L3 11L2 10L8.5 3.5L10 1Z" fill="var(--primary)"/>
+                      </svg>
+                      
+                    </span>	
+                    <h4
                     class="m-0 lesson-heading exam-heading"
                     data-lesson-id="{{ last_lesson.id }}"
                   >
-                    Exam
-                  </h4>
+                  
+                  Exam</h4>
+
+                  
+                  </div>	
                 </div>
               </div>
+              
               {% endif %} {% endwith %}
             </div>
           </div>
@@ -298,6 +346,7 @@
     $(".lesson-heading").on("click", function () {
       document.getElementById("lesson-details").style.display = "block";
       document.getElementById("questions-details").style.display = "none";
+      $("#resultsChart").hide();
       var lessonId = $(this).data("lesson-id");
       var url = "{% url 'get-lesson-details' 0 %}".replace("0", lessonId);
 
@@ -337,6 +386,7 @@
     // Handle exam heading click
     $(".exam-heading").on("click", function () {
       var lessonId = $(this).data("lesson-id");
+      window.scrollTo({ top: 0, behavior: "smooth" });
       var url = "{% url 'get-module-questions' 0 %}".replace("0", lessonId);
 
       // AJAX request to get module questions
@@ -379,40 +429,45 @@
           question.option4,
         ];
         const optionsList = options
-          .map(
-            (option, idx) => `
-                        <div>
-                            <input type="radio" id="option${
-                              idx + 1
-                            }_question${index}" name="question${index}" value="${
+          .map((option, idx) => {
+            const checked = selectedAnswers[index] == idx + 1 ? "checked" : "";
+            return `
+          <div class="form-check">
+            <input class="form-check-input" type="radio" id="option${
               idx + 1
-            }">
-                            <label for="option${
-                              idx + 1
-                            }_question${index}">${option}</label>
-                        </div>
-                    `
-          )
+            }_question${index}" name="question${index}" value="${
+              idx + 1
+            }" ${checked}>
+            <label class="form-check-label" for="option${
+              idx + 1
+            }_question${index}">${option}</label>
+          </div>
+        `;
+          })
           .join("");
 
-        questionsContainer.append(
-          `<div class='question-item'>
-                    <h5>${question.question}</h5>
-                    <div>${optionsList}</div>
-                    </div>`
-        );
+        questionsContainer.append(`
+     <div class='question-item mb-4'>
+  <h5 class="mb-3">${question.question}</h5>
+  <div>${optionsList}</div>
+</div>
+    `);
 
-        // Navigation buttons
+        // Navigation buttons with Bootstrap styles
         const navigationButtons = `
-                <div class="navigation-buttons">
-                    ${index > 0 ? '<button id="prevBtn">Previous</button>' : ""}
-                    ${
-                      index < questions.length - 1
-                        ? '<button id="nextBtn">Next</button>'
-                        : '<button id="submitBtn">Submit</button>'
-                    }
-                </div>
-            `;
+      <div class="navigation-buttons mt-3">
+        ${
+          index > 0
+            ? '<button id="prevBtn" class="btn btn-secondary me-2">Previous</button>'
+            : ""
+        }
+        ${
+          index < questions.length - 1
+            ? '<button id="nextBtn" class="btn btn-primary">Next</button>'
+            : '<button id="submitBtn" class="btn btn-success">Submit</button>'
+        }
+      </div>
+    `;
         questionsContainer.append(navigationButtons);
 
         // Attach event listeners to buttons
@@ -439,6 +494,10 @@
             ).val();
             selectedAnswers[index] = selectedOption; // Capture the last question's selected answer
 
+            // Show generating results label and hide questions
+            $("#questions-container").hide();
+            $("#result-generating").show(); // Show the generating results label
+
             // Prepare data to send to the server
             const resultsData = questions.map((question, idx) => ({
               questionID: question.id,
@@ -452,43 +511,47 @@
 
             // AJAX request to submit results
             $.ajax({
-              url: "{% url 'submit-quiz' %}", // Update with your actual URL
+              url: "{% url 'submit-quiz' %}",
               type: "POST",
               data: JSON.stringify(resultsData),
               contentType: "application/json",
               success: function (response) {
                 displayResults(response.totalCorrect, response.totalQuestions);
+                $("#result-generating").hide(); // Hide generating results label
+                // Prepare and display results
                 let resultHtml = `
-        <h4>Results:</h4>
-        <p>Total Correct: ${response.totalCorrect} out of ${response.totalQuestions} (${response.percentage}%)</p>
-        
-        <table class="table table-bordered">
-            <thead>
-                <tr>
-                    <th>Question</th>
-                    <th>Given Answer</th>
-                    <th>Result</th>
-                </tr>
-            </thead>
-            <tbody>
-    `;
+    <h4>Results:</h4>
+    <p>Total Correct: ${response.totalCorrect} out of ${response.totalQuestions} (${response.percentage}%)</p>
+    <table class="table table-bordered">
+      <thead>
+        <tr>
+          <th>Question</th>
+          <th>Given Answer</th>
+          <th>Result</th>
+        </tr>
+      </thead>
+      <tbody>
+  `;
 
                 response.results.forEach((result) => {
                   resultHtml += `
-            <tr>
-                <td>${result.questionID}</td>
-                <td>${result.givenAnswer}</td>
-                <td>${result.result}</td>
-            </tr>
-        `;
+      <tr>
+        <td>${result.questionID}</td>
+        <td>${result.givenAnswer}</td>
+        <td>${result.result}</td>
+      </tr>
+    `;
                 });
 
                 resultHtml += `
-            </tbody>
-        </table>
-    `;
+      </tbody>
+    </table>
+  `;
 
+                // Update the questions container to show the results
                 $("#questions-container").html(resultHtml);
+                $("#questions-container").show(); // Ensure the results are visible
+                $("#resultsChart").show(); // Show the results chart if it's supposed to be displayed
               },
               error: function (xhr, status, error) {
                 console.error("Error submitting results:", error);
@@ -502,34 +565,40 @@
         );
       }
     }
-// Function to create and display the pie chart
-function displayResults(totalCorrect, totalQuestions) {
-        const incorrectAnswers = totalQuestions - totalCorrect;
 
-        const ctx = document.getElementById('resultsChart').getContext('2d');
-        const resultsChart = new Chart(ctx, {
-            type: 'pie',
-            data: {
-                labels: ['Correct', 'Incorrect'],
-                datasets: [{
-                    label: 'Quiz Results',
-                    data: [totalCorrect, incorrectAnswers],
-                    backgroundColor: ['#4caf50', '#f44336'],
-                }]
+    // Function to create and display the pie chart
+    function displayResults(totalCorrect, totalQuestions) {
+      const incorrectAnswers = totalQuestions - totalCorrect;
+
+      const ctx = document.getElementById("resultsChart").getContext("2d");
+      const resultsChart = new Chart(ctx, {
+        type: "pie",
+        data: {
+          labels: ["Correct", "Incorrect"],
+          datasets: [
+            {
+              label: "Quiz Results",
+              data: [totalCorrect, incorrectAnswers],
+              backgroundColor: ["#4caf50", "#f44336"],
             },
-            options: {
-                responsive: true,
-                plugins: {
-                    legend: {
-                        position: 'top',
-                    },
-                    title: {
-                        display: true,
-                        text: `Total Correct: ${totalCorrect} out of ${totalQuestions} (${((totalCorrect / totalQuestions) * 100).toFixed(2)}%)`
-                    }
-                }
-            }
-        });
+          ],
+        },
+        options: {
+          responsive: true,
+          plugins: {
+            legend: {
+              position: "top",
+            },
+            title: {
+              display: true,
+              text: `Total Correct: ${totalCorrect} out of ${totalQuestions} (${(
+                (totalCorrect / totalQuestions) *
+                100
+              ).toFixed(2)}%)`,
+            },
+          },
+        },
+      });
     }
     // Helper function to escape HTML
     function escapeHtml(unsafe) {
