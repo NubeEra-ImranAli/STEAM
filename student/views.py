@@ -19,30 +19,40 @@ def studykit(request):
             module=OuterRef('module__id')
         )
 
-        # Get the lessons for the user, including the watched_status
+        # Get all lessons with their watched_status
         lessons = list(MyModels.Lesson.objects.filter(
             module__grade__user__id=request.user.id,
             module__grade__user__grade_id=request.user.grade.id,
             module__grade__user__school_id=request.user.school.id,
             module__grade_id=request.user.grade.id
         ).distinct().annotate(
-            watched_status=Exists(watched_lessons_subquery),  # Check if the lesson has been watched
+            watched_status=Exists(watched_lessons_subquery),
             has_ques=Exists(has_question_subquery)
         ).values(
             'id', 
             'module__id', 
             'module__module_name', 
             'heading',
-            'watched_status',  # Include watched_status in the values
+            'watched_status',
             'has_ques'
         ).order_by('module__module_name', 'serialno'))
+        
+        # Iterate through the lessons and set the first NO to YES after the last YES
+        found_first_no = False  # Flag to track if we've found the first NO
 
-        # Set the watched status display
         for i, lesson in enumerate(lessons):
-            if i == 0:  # First lesson in the list
+            if i == 0 and not lesson['watched_status']:  # First lesson in the list
                 lesson['watched_status_display'] = 'YES'
-            else:
-                lesson['watched_status_display'] = 'YES' if lesson['watched_status'] else 'NO'
+                lesson['watched_status'] = True
+            if lesson['watched_status']:  # If we encounter a YES
+                found_first_no = True  # Allow subsequent NOs to be changed to YES
+                lesson['watched_status_display'] = 'YES'
+            elif found_first_no and not lesson['watched_status']:  # If we encounter the first NO after a YES
+                lesson['watched_status'] = True  # Change the first NO to YES
+                lesson['watched_status_display'] = 'YES'
+                break  # Exit after changing the first NO
+
+
         
         
         total_lessons = MyModels.Lesson.objects.filter(
@@ -104,7 +114,7 @@ def get_lesson_details(request, lesson_id):
     grade = student.grade  # Assuming the user model has a grade field
     module = MyModels.Lesson.objects.get(id=lesson_id).module  # Get the lesson's module
     # Create a LessonWatched instance
-    MyModels.LessonWatched.objects.get_or_create(
+    a = MyModels.LessonWatched.objects.get_or_create(
         student=student,
         grade=grade,
         module=module,
