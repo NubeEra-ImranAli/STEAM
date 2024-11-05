@@ -10,4 +10,8 @@ urlpatterns = [
     path('module-exams/', views.module_exams, name='module-exams'),
     path('show-module-exams-attempts/<int:module_id>/', views.show_module_exams_attemps, name='show-module-exams-attempts'),
     path('show-module-result/<int:result_id>/', views.show_module_result, name='show-module-result'),
+    path('exams-list/', views.exams_list, name='exams-list'),
+    path('exams-show-result-details/<int:exam_id>/', views.exam_show_reuslt_details, name='exams-show-result-details'),
+    path('exams-rules/<int:exam_id>/', views.exams_rules, name='exams-rules'),
+    path('exams-running/<int:exam_id>/', views.exam_running, name='exams-running'),
 ]

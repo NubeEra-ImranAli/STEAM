@@ -111,7 +111,7 @@ class Lesson(models.Model):
     process = RichTextField(default='')
     get = RichTextField(default='')
     
-    def __str__(self):
+    def __str__(self):  
         return self.heading
     
 class LessonWatched(models.Model):
@@ -120,8 +120,6 @@ class LessonWatched(models.Model):
     module = models.ForeignKey(Module, on_delete=models.SET_NULL, null=True)
     lesson = models.ForeignKey(Lesson, on_delete=models.SET_NULL, null=True)
     
-    
-
 class ModuleQuestion(models.Model):
     grade = models.ForeignKey(Grade, on_delete=models.SET_NULL, null=True)
     module = models.ForeignKey(Module, on_delete=models.SET_NULL, null=True)
@@ -132,7 +130,7 @@ class ModuleQuestion(models.Model):
     option4=RichTextField(default='')
     cat=(('1','Option1'),('2','Option2'),('3','Option3'),('4','Option4'))
     answer=models.CharField(max_length=200,choices=cat)
-    marks=models.IntegerField(default=0)
+    marks=models.IntegerField(default=1)
 
 class ModuleResult(models.Model):
     student=models.ForeignKey(User,on_delete=models.SET_NULL, null=True)
@@ -147,4 +145,40 @@ class ModuleResult(models.Model):
 class ModuleResultDetails(models.Model):
     moduleresult=models.ForeignKey(ModuleResult,on_delete=models.SET_NULL, null=True)
     question = models.ForeignKey(ModuleQuestion,on_delete=models.SET_NULL, null=True)
+    selected=models.CharField(max_length=200)
+
+
+class Exam(models.Model):
+    grade = models.ForeignKey(Grade, on_delete=models.SET_NULL, null=True)
+    exam_name = models.CharField(max_length=200)
+    description = models.CharField(max_length=1000,default='')
+    def __str__(self):
+        return self.exam_name
+    
+
+class ExamQuestion(models.Model):
+    exam = models.ForeignKey(Exam, on_delete=models.SET_NULL, null=True)
+    grade = models.ForeignKey(Grade, on_delete=models.SET_NULL, null=True)
+    question=RichTextField(default='')
+    option1=RichTextField(default='')
+    option2=RichTextField(default='')
+    option3=RichTextField(default='')
+    option4=RichTextField(default='')
+    cat=(('1','Option1'),('2','Option2'),('3','Option3'),('4','Option4'))
+    answer=models.CharField(max_length=200,choices=cat)
+    marks=models.IntegerField(default=1)
+
+class ExamResult(models.Model):
+    student=models.ForeignKey(User,on_delete=models.SET_NULL, null=True)
+    grade = models.ForeignKey(Grade, on_delete=models.SET_NULL, null=True)
+    exam = models.ForeignKey(Exam, on_delete=models.SET_NULL, null=True)
+    marks = models.PositiveIntegerField()
+    wrong = models.PositiveIntegerField()
+    correct = models.PositiveIntegerField()
+    timetaken = models.CharField(max_length=200)
+    date = models.DateTimeField(auto_now=True)
+
+class ExamResultDetails(models.Model):
+    examresult=models.ForeignKey(ExamResult,on_delete=models.SET_NULL, null=True)
+    question = models.ForeignKey(ExamQuestion,on_delete=models.SET_NULL, null=True)
     selected=models.CharField(max_length=200)

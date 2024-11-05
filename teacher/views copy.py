@@ -10,7 +10,6 @@ from django.db import IntegrityError
 import csv
 from django.http import JsonResponse
 from django.db.models import  F, Value, Q
-from django.db.models import Count, F, Case, When, IntegerField
 from django.db.models.functions import Coalesce
 ROMAN_NUMERAL_MAP = {
                         'V': 5,
@@ -37,46 +36,19 @@ def roman_to_int(roman):
 
 def student_list(request):
     if str(request.session['utype']) == 'teacher':
-        # Get the 'search' query parameter from the GET request, if available
         query = request.GET.get('search', '')
-
-        # Get all students in the current user's school and filter by 'student' type
-        students = User.objects.filter(utype='student', school_id=request.user.school.id, status=True)
-
-        # If there is a search query, filter the students by first name, last name, or username
+        users = User.objects.all().filter(utype = 'student', school_id = request.user.school.id, status = True)
         if query:
-            students = students.filter(
-                Q(first_name__icontains=query) |
-                Q(last_name__icontains=query) |
-                Q(username__icontains=query)
-            )
-
-        # Annotate the students queryset with:
-        # - total lessons for their grade
-        # - total watched lessons for the grade
-        # - percentage of watched lessons
-        students_with_data = students.annotate(
-            total_lessons=Count('grade__lesson', distinct=True),
-            
-            # Correctly count the lessons watched for each student
-            total_watched_lessons=Count(
-                'lessonwatched',  # This counts all 'LessonWatched' records related to each student
-                distinct=True  # Ensure we count each watched lesson only once
-            ),
-            
-            # Calculate the percentage of watched lessons
-            watched_percentage=Case(
-                When(total_lessons__gt=0, then=F('total_watched_lessons') * 100 / F('total_lessons')),
-                default=0,
-                output_field=IntegerField()
-            )
-        ).select_related('grade', 'division')
-
-        # Paginate the results, showing 12 students per page
-        paginator = Paginator(students_with_data, 12)
+                users = users.filter(
+                    Q(first_name__icontains=query) |
+                    Q(last_name__icontains=query) |
+                    Q(username__icontains=query)
+                )
+        paginator = Paginator(users, 12)  # Show 10 users per page
         page_number = request.GET.get('page')
-        students_paginated = paginator.get_page(page_number)
-        return render(request,'teacher/user/student_list.html',{'users':students_paginated})
+        users_paginated = paginator.get_page(page_number)
+        
+        return render(request,'teacher/user/student_list.html',{'users':users_paginated})
     else:
         return render(request,'loginrelated/diffrentuser.html')
     

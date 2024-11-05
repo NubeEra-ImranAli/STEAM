@@ -35,14 +35,21 @@
             <li>
                 <a class="has-arrow " href="javascript:void(0);" aria-expanded="false">
                     <i class="bi bi-heart"></i>
-                    <span class="nav-text">Module Questions</span>
+                    <span class="nav-text">Exams</span>
                 </a>
                 <ul aria-expanded="false">
                     <li>
-                        <a href="{% url 'modulequestion_list' %}">Module Questions List</a>
+                        <a href="{% url 'exam_list' %}">Exams List</a>
                     </li>
                     <li>
-                        <a href="{% url 'modulequestion_create' %}">Create Module Questions</a>
+                        <a href="{% url 'exam_create' %}">Create Exams</a>
+                    </li>
+
+                    <li>
+                        <a href="{% url 'examquestion_list' %}">Exam Questions List</a>
+                    </li>
+                    <li>
+                        <a href="{% url 'examquestion_create' %}">Create Exam Questions</a>
                     </li>
                     
                 </ul>

@@ -8,8 +8,17 @@ urlpatterns = [
     path('student-list-pending', views.student_list_pending,name='student-list-pending'),
     path('uploadstud/', views.upload_student_csv, name='upload-student-csv'),
 
-    path('modulequestion/', views.modulequestion_list, name='modulequestion_list'),
-    path('modulequestion/create/', views.modulequestion_create, name='modulequestion_create'),
-    path('modulequestion/update/<int:id>/', views.modulequestion_update, name='modulequestion_update'),
-    path('modulequestion/delete/<int:id>/', views.modulequestion_delete, name='modulequestion_delete'),
+    path('exams/', views.exam_list, name='exam_list'),
+    path('exams-student-marks/<int:exam_id>/', views.exam_student_marks_list, name='exams-student-marks'),
+    path('exams-student-top/<int:exam_id>/', views.exam_student_top, name='exams-student-top'),
+    path('exams-student-details/<int:exam_id>/<int:student_id>/', views.exam_student_details_list, name='exams-student-details'),
+    path('exams/create/', views.exam_create, name='exam_create'),
+    path('exams/update/<int:id>/', views.exam_update, name='exam_update'),
+    path('exams/delete/<int:id>/', views.exam_delete, name='exam_delete'),
+    path('get-exams/', views.get_exams, name='get_exams'),
+
+    path('examquestion/', views.examquestion_list, name='examquestion_list'),
+    path('examquestion/create/', views.examquestion_create, name='examquestion_create'),
+    path('examquestion/update/<int:id>/', views.examquestion_update, name='examquestion_update'),
+    path('examquestion/delete/<int:id>/', views.examquestion_delete, name='examquestion_delete'),
 ]

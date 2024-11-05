@@ -1,0 +1,94 @@
+{% extends 'student/studentbase.html' %} {% block content %} {% load static %}
+
+<style>
+  ol.breadcrumb li + li:before {
+    content: "\f061";
+    display: inline-block;
+    font-family: "fontAwesome";
+    padding: 0 10px;
+  }
+  #player {
+    display: none;
+  }
+</style>
+<div>
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+      <li>
+        <a href="{% url 'user-dashboard' %}">Dashboard</a>
+      </li>
+      <li aria-current="page">View Exams</li>
+    </ol>
+  </nav>
+</div>
+
+{% if messages %} {% for message in messages %}
+<div class="alert alert-info" id="success-message">{{ message }}</div>
+{% endfor %} {% endif %}
+
+<script>
+  // Wait for the DOM to load
+  document.addEventListener("DOMContentLoaded", function () {
+    // Select the success message
+    var message = document.getElementById("success-message");
+    if (message) {
+      // Set a timer to hide the message after 5 seconds (5000 ms)
+      setTimeout(function () {
+        message.style.display = "none";
+      }, 5000);
+    }
+  });
+</script>
+
+<div class="card">
+  {% if exams %}
+  <div class="table-responsive">
+    <table
+      class="table table-bordered"
+      id="dataTable"
+      width="100%"
+      cellspacing="0"
+    >
+      <thead>
+        <tr>
+          <th>Exam Name</th>
+          <th>Marks</th>
+          <th>Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for exam in exams %}
+        <tr>
+          <td>{{exam.exam_name}}</td>
+          
+          {% if exam.marks > 0 %}
+          <td>{{exam.marks}}</td>
+            {% else %}
+            <td>Not attempted yet</td>
+            {% endif %}
+          <td>
+            {% if exam.marks > 0 %}
+            <a
+              class="btn btn-primary btn-xs"
+              href="{% url 'exams-show-result-details' exam.id %}"
+              ><span class="far fa-eye"></span
+            ></a>
+            {% else %}
+            <a
+              class="btn btn-primary btn-xs"
+              href="{% url 'exams-rules' exam.id %}"
+              ><span class="fa fa-book"></span
+            ></a>
+            {% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% else %}
+  <p>There are no exam available yet</p>
+  {% endif %}
+</div>
+
+{% endblock %}

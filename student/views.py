@@ -3,7 +3,8 @@ from django.contrib.auth.decorators import login_required
 from steamapp import models as MyModels
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.db.models import Exists, OuterRef,Case, When, Value, IntegerField,F
+from django.db.models import Exists, OuterRef,Case, When, Value, IntegerField,F, Value, Q
+from django.db.models.functions import Coalesce
 import json
 
 # Display list of modules
@@ -75,7 +76,8 @@ def studykit(request):
         
         from itertools import groupby
         from operator import itemgetter
-
+        from django.db.models import Count, F, Case, When, IntegerField
+        from django.db.models.functions import Coalesce
         grouped_lessons = {key: list(group) for key, group in groupby(lessons, key=itemgetter('module__module_name'))}
         
         return render(request, 'student/studykit/studykit.html', 
@@ -307,3 +309,114 @@ def show_module_result(request,result_id):
                        })
     else:
         return render(request,'loginrelated/diffrentuser.html')
+    
+
+@login_required
+def exams_list(request):
+    if str(request.session['utype']) == 'student':
+        # Get all the exams for student_id=14 and grade_id=1, annotate marks with 0 if not available
+        exam_results = MyModels.Exam.objects.annotate(
+        marks=Coalesce(
+            F('examresult__marks'),  # Get marks from ExamResult if exists
+            Value(0)  # Use 0 if no ExamResult exists
+        )
+    ).filter(
+        Q   (
+                examresult__student_id = request.user.id,
+                examresult__grade_id = request.user.grade_id
+            ) 
+          | 
+        Q   (
+                examresult__isnull=True
+            )
+    )
+        return render(request, 'student/exam/exam_list.html', 
+                      {'exams': exam_results
+                       })
+    else:
+        return render(request,'loginrelated/diffrentuser.html')
+
+@login_required
+def exam_show_reuslt_details(request,exam_id):
+    try:    
+        if str(request.session['utype']) == 'student':
+            exams=MyModels.ExamResultDetails.objects.all().filter(examresult__exam_id = exam_id,question_id__in = MyModels.ExamQuestion.objects.all())
+            return render(request,'student/exam/exam_result_details.html',{'exams':exams})
+    except:
+        return render(request,'lxpapp/404page.html')
+    
+@login_required
+def exams_rules(request,exam_id):
+    if str(request.session['utype']) == 'student':
+        exam = MyModels.Exam.objects.get(id=exam_id)
+        # Get all questions related to the exam
+        questions = MyModels.ExamQuestion.objects.filter(exam=exam)
+        # Calculate total questions and total marks
+        total_questions = questions.count()
+        total_marks = sum(question.marks for question in questions)
+
+        context = {
+            'exam': exam,
+            'total_questions': total_questions,
+            'total_marks': total_marks,
+        }
+        return render(request, 'student/exam/exam_rules.html', 
+                      {'exams': context
+                       })
+    else:
+        return render(request,'loginrelated/diffrentuser.html')
+    
+@login_required
+def exam_running(request,exam_id):
+    try:    
+        if str(request.session['utype']) == 'student':
+            if request.method == 'POST':
+                examresult = MyModels.ExamResult.objects.create(student_id = request.user.id,grade_id = request.user.grade_id,exam_id =exam_id,marks=0,wrong=0,correct=0)
+                examresult.save()
+                questions=MyModels.ExamQuestion.objects.all().filter(exam_id=exam_id).order_by('?')
+                score=0
+                wrong=0
+                correct=0
+                total=0
+                r_id = 0
+                q_id = 0
+                r_id = examresult.id
+                for q in questions:
+                    total+=1
+                    question = MyModels.ExamQuestion.objects.all().filter(question=q.question)
+                    for i in question:
+                        q_id = i.id
+                    resdet = MyModels.ExamResultDetails.objects.create(examresult_id = r_id,question_id =q_id,selected =str(request.POST.get(q.question)).replace('option',''))
+                    resdet.save()
+                    if 'option' + q.answer ==  request.POST.get(q.question):
+                        score+= q.marks
+                        correct+=1
+                        
+                    else:
+                        wrong+=1
+                percent = score/(total) *100
+                context = {
+                    'score':score,
+                    'time': request.POST.get('timer'),
+                    'correct':correct,
+                    'wrong':wrong,
+                    'percent':percent,
+                    'total':total
+                }
+                examresult.marks = score
+                examresult.wrong = wrong
+                examresult.correct = correct
+                examresult.timetaken = request.POST.get('timer')
+                examresult.save()
+                resdetobj = MyModels.ExamResultDetails.objects.raw("SELECT 1 as id,  steamapp_examquestion.question as q,  steamapp_examquestion.option1 as o1,  steamapp_examquestion.option2 as o2,  steamapp_examquestion.option3 as o3,  steamapp_examquestion.option4 as o4,  steamapp_examquestion.answer AS Correct,  steamapp_examquestion.marks,  steamapp_examresultdetails.selected AS answered  FROM  steamapp_examresultdetails  INNER JOIN steamapp_examresult ON (steamapp_examresultdetails.examresult_id = steamapp_examresult.id)  INNER JOIN steamapp_examquestion ON (steamapp_examresultdetails.question_id = steamapp_examquestion.id) WHERE steamapp_examresult.id = " + str(r_id) + " AND steamapp_examresult.student_id = " + str(request.user.id) + " ORDER BY steamapp_examquestion.id" )
+                return render(request,'student/exam/exam_result.html',{'total':total,'percent':percent, 'wrong':wrong,'correct':correct,'time': request.POST.get('timer'),'score':score,'resdetobj':resdetobj})
+            else:
+                questions=MyModels.ExamQuestion.objects.all()
+                context = {
+                    'questions':questions
+                }
+            exam=MyModels.Exam.objects.get(id=exam_id)
+            questions=MyModels.ExamQuestion.objects.all().filter(exam_id=exam.id).order_by('?')
+            return render(request,'student/exam/exam_start.html',{'exam':exam,'questions':questions})
+    except:
+        return render(request,'lxpapp/404page.html')

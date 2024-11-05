@@ -9,6 +9,18 @@
     .pagination {
         margin-top: 20px;
     }
+    /* Ensure the progress bar fits the height of the table cell */
+td .progress {
+    height: 30px; /* Adjust this value as needed to fit the cell height */
+}
+
+td .progress-bar {
+    height: 100%;  /* Ensure the progress bar fills the entire height of the progress div */
+    line-height: 30px; /* Vertically center the text inside the bar */
+    color: #fff;  /* White text color */
+    text-align: center;  /* Center the text inside the bar */
+    font-weight: bold;  /* Make the text bold */
+}
 </style>
     <div class="row mb-3">
         <div class="col-md-12"></div>
@@ -97,6 +109,16 @@
                                     aria-label="Student ID: activate to sort column ascending"
                                     style="width: 180.828px;"
                                 >Division</th>
+
+                                <th
+                                    class="sorting"
+                                    tabindex="0"
+                                    aria-controls="application-tbl1"
+                                    rowspan="1"
+                                    colspan="1"
+                                    aria-label="Student ID: activate to sort column ascending"
+                                    style="width: 180.828px;"
+                                >Progress</th>
                         </thead>
                         <tbody>
                             {% for t in users %}
@@ -112,8 +134,19 @@
                                     </div>
                                 </td>
                                 <td>{{t.username}}</td>
-                                <td>{{t.grade}}</td>
-                                <td>{{t.division}}</td>
+                                <td>{{t.grade.grade_name}}</td>
+                                <td>{{t.division.division_name}}</td>
+                                <td>
+                                    <!-- Progress bar showing the watched percentage -->
+                                    <div class="progress">
+                                        <div class="progress-bar bg-danger" 
+                                             style="width: {{ t.watched_percentage }}%;" 
+                                             role="progressbar">
+                                            <!-- Percentage text shown inside the progress bar -->
+                                            {{ t.watched_percentage }}%
+                                        </div>
+                                    </div>
+                                </td>
                                 
                                 </tr>
                             {% endfor %}

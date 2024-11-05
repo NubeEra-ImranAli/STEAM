@@ -1,0 +1,78 @@
+{% extends 'teacher/teacherbase.html' %}
+{% block content %}
+{% load static %}
+<link rel="stylesheet" href="/static/get/css/style.css">
+<style>
+  ol.breadcrumb li+li:before {
+    content: '\f061';
+  display: inline-block;
+  font-family: 'fontAwesome';
+  padding: 0 10px;
+  }
+  </style>
+<div>
+  <nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li><a href="{% url 'user-dashboard' %}">Dashboard</a></li>
+        <li><a href="{% url 'exam_create' %}">New Exam</a></li>
+        <li>    <a href="{% url 'exam_list' %}">Exam List</a></li>
+      <li aria-current="page">View Student Result</li>
+    </ol>
+  </nav>
+</div>
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-info" id="success-message">{{ message }}</div>
+    {% endfor %}
+{% endif %}
+
+<script>
+    // Wait for the DOM to load
+    document.addEventListener("DOMContentLoaded", function() {
+        // Select the success message
+        var message = document.getElementById("success-message");
+        if (message) {
+            // Set a timer to hide the message after 5 seconds (5000 ms)
+            setTimeout(function() {
+                message.style.display = 'none';
+            }, 5000);
+        }
+    });
+</script>
+
+<div class="card">
+  <div class="table-responsive">
+    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+      <thead>
+        <tr>
+            <th>Student Name</th>
+            <th>Marks</th>
+          <th>Details</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for student in students %}
+            <tr>
+                <td>{{ student.user_full_name }}</td>
+                {% if student.exam_id %}
+                <td>{{ student.marks }}</td>
+                <td>
+                    <a class="btn btn-primary btn-xs" href="{% url 'exams-student-details' student.exam_id student.student_id %}">
+                      <span class="far fa-eye"></span>
+                    </a>
+                  </td>
+                  {% else %}
+                    <td><span>No exam</span></td>
+                    <td><span>No exam</span></td>
+                  {% endif %}
+                </td>
+            </tr>
+        {% endfor %}
+    </tbody>
+    </table>
+    
+  </div>
+</div>
+
+
+    {% endblock content %}
