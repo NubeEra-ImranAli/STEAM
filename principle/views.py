@@ -6,6 +6,13 @@ from django.http import HttpResponse
 from steamapp.models import User
 from django.db import IntegrityError
 
+def test_list(request):
+    if str(request.session['utype']) == 'principle':
+        return render(request,'principle/test.html')
+    else:
+        return render(request,'loginrelated/diffrentuser.html')
+
+
 def teacher_list(request):
     if str(request.session['utype']) == 'principle':
         users = User.objects.all().filter(utype = 'teacher', school_id = request.user.school.id, status = True)

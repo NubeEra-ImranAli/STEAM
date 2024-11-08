@@ -5,6 +5,10 @@ from django.contrib.auth.views import LoginView
 urlpatterns = [
     path('create-student', views.create_student,name='create-student'),
     path('student-list', views.student_list,name='student-list'),
+    path('student-attendance', views.student_attendance,name='student-attendance'),
+    path('attendance-report/', views.attendance_report_view, name='attendance-report'),
+    path('attendance/<int:grade_id>/<int:division_id>/<str:date>/', views.attendance_details, name='attendance_details'),
+
     path('student-list-pending', views.student_list_pending,name='student-list-pending'),
     path('uploadstud/', views.upload_student_csv, name='upload-student-csv'),
 

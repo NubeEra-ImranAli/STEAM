@@ -10,6 +10,7 @@ from django.db import IntegrityError
 import csv
 from django.http import JsonResponse
 from django.db.models import  F, Value, Q
+from django.db.models import Count, F, Case, When, IntegerField
 from django.db.models.functions import Coalesce
 ROMAN_NUMERAL_MAP = {
                         'V': 5,
@@ -36,21 +37,134 @@ def roman_to_int(roman):
 
 def student_list(request):
     if str(request.session['utype']) == 'teacher':
+        # Get the 'search' and 'grade_id' parameters from the GET request
         query = request.GET.get('search', '')
-        users = User.objects.all().filter(utype = 'student', school_id = request.user.school.id, status = True)
+        grade_id = request.GET.get('grade_id')
+        division_id = request.GET.get('division_id')
+
+        # Get all grades to populate the dropdown
+        grades = MyModels.Grade.objects.all()
+
+        # Get all division to populate the dropdown
+        divisions = MyModels.Division.objects.all()
+
+        # Filter students by 'student' type and the current teacher's school
+        students = User.objects.filter(
+            utype='student',
+            school_id=request.user.school.id,
+            status=True
+        )
+
+        # Apply search filter
         if query:
-                users = users.filter(
-                    Q(first_name__icontains=query) |
-                    Q(last_name__icontains=query) |
-                    Q(username__icontains=query)
-                )
-        paginator = Paginator(users, 12)  # Show 10 users per page
-        page_number = request.GET.get('page')
-        users_paginated = paginator.get_page(page_number)
+            students = students.filter(
+                Q(first_name__icontains=query) |
+                Q(last_name__icontains=query) |
+                Q(username__icontains=query) |
+                Q(grade__grade_name__icontains=query) |
+                Q(division__division_name__icontains=query)
+            )
+
+        # Apply grade filter if a grade is selected
+        if grade_id:
+            students = students.filter(grade_id=grade_id)
         
-        return render(request,'teacher/user/student_list.html',{'users':users_paginated})
+        # Apply division filter if a grade is selected
+        if division_id:
+            students = students.filter(division_id=division_id)
+
+        # Annotate the students queryset with progress data
+        students_with_data = students.annotate(
+            total_lessons=Count('grade__lesson', distinct=True),
+            total_watched_lessons=Count('lessonwatched', distinct=True),
+            watched_percentage=Case(
+                When(total_lessons__gt=0, then=F('total_watched_lessons') * 100 / F('total_lessons')),
+                default=0,
+                output_field=IntegerField()
+            )
+        ).select_related('grade', 'division')
+
+        # Paginate the results
+        paginator = Paginator(students_with_data, 50)
+        page_number = request.GET.get('page')
+        students_paginated = paginator.get_page(page_number)
+
+        return render(request, 'teacher/user/student_list.html', {
+            'users': students_paginated,
+            'grades': grades,  # Pass grades to the template for the dropdown
+            'selected_grade': grade_id,  # Preserve the selected grade
+            'divisions': divisions,  # Pass divisions to the template for the dropdown
+            'selected_division': division_id,  # Preserve the selected division
+            'query': query  # Preserve the search query
+        })
     else:
-        return render(request,'loginrelated/diffrentuser.html')
+        return render(request, 'loginrelated/diffrentuser.html')
+    
+def student_attendance(request):
+    if str(request.session['utype']) == 'teacher':
+        # Get the 'search' and 'grade_id' parameters from the GET request
+        query = request.GET.get('search', '')
+        grade_id = request.GET.get('grade_id')
+        division_id = request.GET.get('division_id')
+
+        # Get all grades to populate the dropdown
+        grades = MyModels.Grade.objects.all()
+
+        # Get all division to populate the dropdown
+        divisions = MyModels.Division.objects.all()
+
+        # Filter students by 'student' type and the current teacher's school
+        students = User.objects.filter(
+            utype='student',
+            school_id=request.user.school.id,
+            status=True
+        )
+
+        # Apply search filter
+        if query:
+            students = students.filter(
+                Q(first_name__icontains=query) |
+                Q(last_name__icontains=query) |
+                Q(username__icontains=query) |
+                Q(grade__grade_name__icontains=query) |
+                Q(division__division_name__icontains=query)
+            )
+
+        # Apply grade filter if a grade is selected
+        if grade_id:
+            students = students.filter(grade_id=grade_id)
+        
+        # Apply division filter if a grade is selected
+        if division_id:
+            students = students.filter(division_id=division_id)
+
+        # Annotate the students queryset with progress data
+        students_with_data = students.annotate(
+            total_lessons=Count('grade__lesson', distinct=True),
+            total_watched_lessons=Count('lessonwatched', distinct=True),
+            watched_percentage=Case(
+                When(total_lessons__gt=0, then=F('total_watched_lessons') * 100 / F('total_lessons')),
+                default=0,
+                output_field=IntegerField()
+            )
+        ).select_related('grade', 'division')
+
+        # Paginate the results
+        paginator = Paginator(students_with_data, 50)
+        page_number = request.GET.get('page')
+        students_paginated = paginator.get_page(page_number)
+
+        return render(request, 'teacher/user/student_attendance.html', {
+            'users': students_paginated,
+            'grades': grades,  # Pass grades to the template for the dropdown
+            'selected_grade': grade_id,  # Preserve the selected grade
+            'divisions': divisions,  # Pass divisions to the template for the dropdown
+            'selected_division': division_id,  # Preserve the selected division
+            'query': query  # Preserve the search query
+        })
+    else:
+        return render(request, 'loginrelated/diffrentuser.html')
+    
     
 def student_list_pending(request):
     if str(request.session['utype']) == 'teacher':
@@ -62,7 +176,7 @@ def student_list_pending(request):
                     Q(last_name__icontains=query) |
                     Q(username__icontains=query)
                 )
-        paginator = Paginator(users, 12)  # Show 10 users per page
+        paginator = Paginator(users, 50)  # Show 10 users per page
         page_number = request.GET.get('page')
         users_paginated = paginator.get_page(page_number)
         
@@ -200,7 +314,7 @@ def teacher_view_user_list_view(request):
                 )
 
             # Pagination
-            paginator = Paginator(users, 12)  # Show 10 users per page
+            paginator = Paginator(users, 50)  # Show 10 users per page
             page_number = request.GET.get('page')
             users_paginated = paginator.get_page(page_number)
             return render(request,'teacher/studentrelated/teacher_view_user_list.html',{'users': users_paginated, 'query': query})

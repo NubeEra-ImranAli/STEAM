@@ -12,6 +12,8 @@ from django.http import JsonResponse
 from django.db.models import  F, Value, Q
 from django.db.models import Count, F, Case, When, IntegerField
 from django.db.models.functions import Coalesce
+from datetime import datetime
+import json
 ROMAN_NUMERAL_MAP = {
                         'V': 5,
                         'VI': 6,
@@ -37,34 +39,46 @@ def roman_to_int(roman):
 
 def student_list(request):
     if str(request.session['utype']) == 'teacher':
-        # Get the 'search' query parameter from the GET request, if available
+        # Get the 'search' and 'grade_id' parameters from the GET request
         query = request.GET.get('search', '')
+        grade_id = request.GET.get('grade_id')
+        division_id = request.GET.get('division_id')
 
-        # Get all students in the current user's school and filter by 'student' type
-        students = User.objects.filter(utype='student', school_id=request.user.school.id, status=True)
+        # Get all grades to populate the dropdown
+        grades = MyModels.Grade.objects.all()
 
-        # If there is a search query, filter the students by first name, last name, or username
+        # Get all division to populate the dropdown
+        divisions = MyModels.Division.objects.all()
+
+        # Filter students by 'student' type and the current teacher's school
+        students = User.objects.filter(
+            utype='student',
+            school_id=request.user.school.id,
+            status=True
+        )
+
+        # Apply search filter
         if query:
             students = students.filter(
                 Q(first_name__icontains=query) |
                 Q(last_name__icontains=query) |
-                Q(username__icontains=query)
+                Q(username__icontains=query) |
+                Q(grade__grade_name__icontains=query) |
+                Q(division__division_name__icontains=query)
             )
 
-        # Annotate the students queryset with:
-        # - total lessons for their grade
-        # - total watched lessons for the grade
-        # - percentage of watched lessons
+        # Apply grade filter if a grade is selected
+        if grade_id:
+            students = students.filter(grade_id=grade_id)
+        
+        # Apply division filter if a grade is selected
+        if division_id:
+            students = students.filter(division_id=division_id)
+
+        # Annotate the students queryset with progress data
         students_with_data = students.annotate(
             total_lessons=Count('grade__lesson', distinct=True),
-            
-            # Correctly count the lessons watched for each student
-            total_watched_lessons=Count(
-                'lessonwatched',  # This counts all 'LessonWatched' records related to each student
-                distinct=True  # Ensure we count each watched lesson only once
-            ),
-            
-            # Calculate the percentage of watched lessons
+            total_watched_lessons=Count('lessonwatched', distinct=True),
             watched_percentage=Case(
                 When(total_lessons__gt=0, then=F('total_watched_lessons') * 100 / F('total_lessons')),
                 default=0,
@@ -72,13 +86,89 @@ def student_list(request):
             )
         ).select_related('grade', 'division')
 
-        # Paginate the results, showing 12 students per page
-        paginator = Paginator(students_with_data, 12)
+        # Paginate the results
+        paginator = Paginator(students_with_data, 50)
         page_number = request.GET.get('page')
         students_paginated = paginator.get_page(page_number)
-        return render(request,'teacher/user/student_list.html',{'users':students_paginated})
+
+        return render(request, 'teacher/user/student_list.html', {
+            'users': students_paginated,
+            'grades': grades,  # Pass grades to the template for the dropdown
+            'selected_grade': grade_id,  # Preserve the selected grade
+            'divisions': divisions,  # Pass divisions to the template for the dropdown
+            'selected_division': division_id,  # Preserve the selected division
+            'query': query  # Preserve the search query
+        })
     else:
-        return render(request,'loginrelated/diffrentuser.html')
+        return render(request, 'loginrelated/diffrentuser.html')
+    
+def student_attendance(request):
+    if str(request.session['utype']) == 'teacher':
+        query = request.GET.get('search', '')
+        grade_id = request.GET.get('grade_id', '')
+        division_id = request.GET.get('division_id', '')
+
+        # Filter students based on search criteria
+        students = User.objects.all().filter(utype ='student',school_id = request.user.school_id)
+        if query:
+            students = students.filter(first_name__icontains=query) | students.filter(last_name__icontains=query)
+        if grade_id:
+            students = students.filter(grade_id=grade_id)
+        if division_id:
+            students = students.filter(division_id=division_id)
+            
+        # Handle POST request (for saving attendance)
+        if request.method == 'POST':
+            tdate_str = request.POST.get('tdate')
+
+            # Parse the date (assume it's passed in the format dd-mm-yyyy)
+            try:
+                tdate = datetime.strptime(tdate_str, '%d-%m-%Y').date()
+            except ValueError:
+                return JsonResponse({"error": "Invalid date format"}, status=400)
+
+            # Process each student's attendance
+            for student in students:
+                student_id = student.id
+                attendance = request.POST.get(f'attendance_{student_id}')
+
+                if attendance is not None:
+                    # Convert attendance to integer (1 for present, 0 for absent)
+                    is_present = int(attendance)
+                    try:
+                        attendance_record = MyModels.StudentAttendance.objects.get(
+                            student_id=student.id, 
+                            date=tdate
+                        )
+                        # If the attendance record exists, update it
+                        attendance_record.status = is_present
+                        attendance_record.save()
+
+                    except MyModels.StudentAttendance.DoesNotExist:
+                        # If the record doesn't exist, create it
+                        attendance_record = MyModels.StudentAttendance(
+                            student=student,
+                            date=tdate,
+                            status=is_present
+                        )
+                        attendance_record.save()
+                    
+
+            # Redirect to the same page or a success page after saving
+            return redirect('student-attendance')  # You can change this to a success page URL if needed
+
+        # If GET request, render the page with the student data
+        return render(request, 'teacher/user/student_attendance.html', {
+            'students': students,
+            'tdate': datetime.today().strftime('%d-%m-%Y'),  # Default to today's date
+            'query': query,
+            'grades': MyModels.Grade.objects.all(),
+            'divisions': MyModels.Division.objects.all(),
+            'selected_grade': grade_id,
+            'selected_division': division_id,
+        })
+
+    return render(request, 'loginrelated/diffrentuser.html')
     
 def student_list_pending(request):
     if str(request.session['utype']) == 'teacher':
@@ -90,7 +180,7 @@ def student_list_pending(request):
                     Q(last_name__icontains=query) |
                     Q(username__icontains=query)
                 )
-        paginator = Paginator(users, 12)  # Show 10 users per page
+        paginator = Paginator(users, 50)  # Show 10 users per page
         page_number = request.GET.get('page')
         users_paginated = paginator.get_page(page_number)
         
@@ -228,14 +318,143 @@ def teacher_view_user_list_view(request):
                 )
 
             # Pagination
-            paginator = Paginator(users, 12)  # Show 10 users per page
+            paginator = Paginator(users, 50)  # Show 10 users per page
             page_number = request.GET.get('page')
             users_paginated = paginator.get_page(page_number)
             return render(request,'teacher/studentrelated/teacher_view_user_list.html',{'users': users_paginated, 'query': query})
     #except:
         return render(request,'loginrelated/diffrentuser.html')
 
+
+def attendance_report_view(request):
+    # Fetch all grades and divisions for the dropdown
+    grades = MyModels.Grade.objects.all()
+    divisions = MyModels.Division.objects.all()
+
+    # Get search parameters from GET request
+    search_date = request.GET.get('date', None)
+    search_grade = request.GET.get('grade', None)
+    search_division = request.GET.get('division', None)
+
+    # Convert date from string to date object if provided
+    if search_date:
+        try:
+            search_date = datetime.strptime(search_date, '%d-%m-%Y').date()
+        except ValueError:
+            search_date = None  # If invalid date format, ignore
+
+    # Filter StudentAttendance based on the search date
+    attendance_data = MyModels.StudentAttendance.objects.all()
+    if search_date:
+        attendance_data = attendance_data.filter(date=search_date)
+
+    # Filter by grade and division if provided
+    if search_grade:
+        attendance_data = attendance_data.filter(student__grade__id=search_grade)
+    if search_division:
+        attendance_data = attendance_data.filter(student__division__id=search_division)
+
+    # Get distinct grades and divisions from the filtered attendance data
+    grades_and_divisions = attendance_data.values('student__grade', 'student__division') \
+        .distinct()
+
+    report = []
+
+    for item in grades_and_divisions:
+        grade = MyModels.Grade.objects.get(id =item['student__grade']) 
+        division = MyModels.Division.objects.get(id =item['student__division']) 
+
+        # Get the total number of students in this grade and division (from User model)
+        total_students = User.objects.filter(grade=grade, division=division, utype='student').count()
+
+        # Get the attendance data for these students (filtered by date)
+        students_in_division = attendance_data.filter(student__grade=grade, student__division=division)
+
+        # Count present and absent students based on attendance data
+        total_present = students_in_division.filter(status=1).count()
+        total_absent = students_in_division.filter(status=0).count()
+
+        # Calculate attendance percentage
+        if total_students > 0:
+            attendance_percentage = (total_present / total_students) * 100
+        else:
+            attendance_percentage = 0
+
+        # Prepare the report entry
+        report.append({
+            'Date': search_date.strftime('%d-%m-%Y') if search_date else '',
+            'Grade': grade,
+            'Division': division,
+            'total_students': total_students,
+            'total_present': total_present,
+            'total_absent': total_absent,
+            'attendance_percentage': round(attendance_percentage, 2),
+        })
+    # Pass data to the template
+    return render(request, 'teacher/user/student_attendance_report.html', {
+        'report': report,
+        'search_date': search_date.strftime('%d-%m-%Y') if search_date else '',
+        'search_grade': search_grade,
+        'search_division': search_division,
+        'grades': grades,
+        'divisions': divisions,
+    })
+
+
+@login_required
+def attendance_details(request, grade_id, division_id, date):
+    if str(request.session['utype']) == 'teacher':
+        # Convert the date string to a date object
+        try:
+            attendance_date = datetime.strptime(date, '%d-%m-%Y').date()
+        except ValueError:
+            return render(request, 'attendance/error.html', {'error': 'Invalid date format'})
+
+        # Query to get students with the given grade, division, and attendance date
+        students_with_attendance = (
+            User.objects.filter(grade_id=grade_id, division_id=division_id, utype='student')
+            .prefetch_related('studentattendance_set')  # Optimize query to access related attendance
+        )
+
+        # Get grade and division names
+        grade_name = MyModels.Grade.objects.get(id=grade_id).grade_name
+        division_name = MyModels.Division.objects.get(id=division_id).division_name
+
+        # Prepare students' data with attendance status for the given date
+        students_data = []
+        for student in students_with_attendance:
+            # Get the first attendance record for the specific date
+            attendance = student.studentattendance_set.filter(date=attendance_date).first()
+
+            # Determine the attendance status
+            if attendance:
+                if attendance.status == 1:
+                    status = 'Present'
+                elif attendance.status == 0:
+                    status = 'Absent'
+                else:
+                    status = 'Unknown'
+            else:
+                status = 'No Record'
+
+            students_data.append({
+                'id': student.pk ,
+                'user_full_name': student.first_name + ' ' + student.last_name,
+                'roll_no': student.roll_no,
+                'attendance_status': status
+            })
+
+        # Render the template with the list of students and attendance status
+        return render(request, 'teacher/user/student_attendance_details.html', {
+            'students_data': students_data,
+            'attendance_date': attendance_date,
+            'grade_name': grade_name,
+            'division_name': division_name,
+        })
+    else:
+        return render(request, 'loginrelated/diffrentuser.html')
     
+
 # Display list of exams
 @login_required
 def exam_list(request):

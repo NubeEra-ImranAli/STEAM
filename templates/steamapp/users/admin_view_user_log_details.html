@@ -1,11 +1,14 @@
-{% extends 'steamapp/adminbase.html' %}
-{% block content %}
-{%load static%}
+{% extends 'steamapp/adminbase.html' %} {% block content %} {%load static%}
 
-<link rel="stylesheet" href="/static/dreamlms/css/style.css">
+<link rel="stylesheet" href="/static/dreamlms/css/style.css" />
 <div class="card-body">
   <div class="table-responsive">
-    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+    <table
+      class="table table-bordered"
+      id="dataTable"
+      width="100%"
+      cellspacing="0"
+    >
       <thead>
         <tr>
           <th>User Name</th>
@@ -18,18 +21,17 @@
         {% for t in users %}
         <tr>
           {% if t.user.first_name == "" %}
-          <td> {{t.user.username}}</td>
+          <td>{{t.user.username}}</td>
           {% else %}
-          <td> {{t.user.first_name}}  {{t.user.last_name}} </td>
+          <td>{{t.user.first_name}} {{t.user.last_name}}</td>
           {% endif %}
-          <td> {{t.login}}</td>
-          <td> {{t.logout}}</td>
-          <td> {{t.dur}}</td>
-          
+          <td>{{t.login}}</td>
+          <td>{{t.logout}}</td>
+          <td>{{t.dur}}</td>
         </tr>
         {% endfor %}
       </tbody>
     </table>
   </div>
 </div>
-        {% endblock content %}
+{% endblock content %}

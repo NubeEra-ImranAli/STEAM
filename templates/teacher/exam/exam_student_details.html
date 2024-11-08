@@ -1,12 +1,13 @@
 {% extends 'teacher/teacherbase.html' %} {% block content %} {%load static%}
 
 <style>
-  ol.breadcrumb li + li:before {
+  ol.breadcrumb li+li:before {
     content: "\f061";
     display: inline-block;
     font-family: "fontAwesome";
     padding: 0 10px;
   }
+
   #player {
     display: none;
   }
@@ -18,7 +19,7 @@
         <a href="{% url 'user-dashboard' %}">Dashboard</a>
       </li>
       <li><a href="{% url 'exam_create' %}">New Exam</a></li>
-        <li>    <a href="{% url 'exam_list' %}">Exam List</a></li>
+      <li><a href="{% url 'exam_list' %}">Exam List</a></li>
       <li aria-current="page">View Result Details</li>
     </ol>
   </nav>
@@ -30,12 +31,12 @@
 
 <script>
   // Wait for the DOM to load
-  document.addEventListener("DOMContentLoaded", function () {
+  document.addEventListener("DOMContentLoaded", function() {
     // Select the success message
     var message = document.getElementById("success-message");
     if (message) {
       // Set a timer to hide the message after 5 seconds (5000 ms)
-      setTimeout(function () {
+      setTimeout(function() {
         message.style.display = "none";
       }, 5000);
     }
@@ -43,12 +44,7 @@
 </script>
 <div class="card">
   <div class="table-responsive">
-    <table
-      class="table table-bordered"
-      id="dataTable"
-      width="100%"
-      cellspacing="0"
-    >
+    <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
       <thead>
         <tr>
           <th>Question</th>
@@ -73,7 +69,8 @@
         <td>{{t.question.marks}}</td>
         <td>{{t.selected}}</td>
         <td>
-          {% if t.question.answer == t.selected %} {{t.question.marks}} {% else %} 0 {% endif %}
+          {% if t.question.answer == t.selected %} {{t.question.marks}} {% else
+          %} 0 {% endif %}
         </td>
       </tr>
       {% endfor %}
@@ -89,16 +86,15 @@
           <th>Total Correct</th>
           <th>Total Wrong</th>
         </tr>
-    </thead>
-    <tbody>
-            <tr>
-                <td>{{ exams.marks }}</td>
-                <td>{{ exams.wrong }}</td>
-                <td>{{ exams.correct }}</td>
-            </tr>
-    </tbody>
+      </thead>
+      <tbody>
+        <tr>
+          <td>{{ exams.marks }}</td>
+          <td>{{ exams.wrong }}</td>
+          <td>{{ exams.correct }}</td>
+        </tr>
+      </tbody>
     </table>
-    
   </div>
 </div>
 {% endblock content %}

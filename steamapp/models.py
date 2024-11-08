@@ -102,6 +102,7 @@ class Lesson(models.Model):
     grade = models.ForeignKey(Grade, on_delete=models.SET_NULL, null=True)
     module = models.ForeignKey(Module, on_delete=models.SET_NULL, null=True)
     serialno = models.PositiveIntegerField()
+    mints = models.PositiveIntegerField(default=0)
     heading = RichTextField(default='')
     about = RichTextField(default='')
     reqmaterial =RichTextField(default='')
@@ -182,3 +183,9 @@ class ExamResultDetails(models.Model):
     examresult=models.ForeignKey(ExamResult,on_delete=models.SET_NULL, null=True)
     question = models.ForeignKey(ExamQuestion,on_delete=models.SET_NULL, null=True)
     selected=models.CharField(max_length=200)
+
+class StudentAttendance(models.Model):
+    student=models.ForeignKey(User,on_delete=models.SET_NULL, null=True)
+    date = models.DateField(auto_now=True)
+    status = models.PositiveIntegerField(default=0)
+

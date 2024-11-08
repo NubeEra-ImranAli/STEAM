@@ -440,7 +440,7 @@ def admin_view_user_list_view(request):
                 )
 
             # Pagination
-            paginator = Paginator(users, 12)  # Show 10 users per page
+            paginator = Paginator(users, 50)  # Show 10 users per page
             page_number = request.GET.get('page')
             users_paginated = paginator.get_page(page_number)
             return render(request,'steamapp/users/admin_view_user_list.html',{'users': users_paginated, 'query': query})
@@ -539,17 +539,17 @@ def admin_view_user_list_school_view(request):
             
             school_id = selected_school_id
             if school_id:
-                users = User.objects.filter(school_id=school_id , utype = 'student')
+                users = User.objects.filter(school_id=school_id)
                 if users.exists():
                     if 'active' in request.POST:
                         users.update(status=True)
-                        messages.success(request, 'All students for selected school activated ')
+                        messages.success(request, 'All users for selected school activated ')
 
                     elif 'hold' in request.POST:
                         users.update(status=False)
-                        messages.success(request, 'All students for selected school holded ')
+                        messages.success(request, 'All users for selected school holded ')
 
-        users = User.objects.all().filter(is_superuser=False)
+        users = User.objects.all().filter(is_superuser=False, utype__in=['student', 'teacher', 'principle'])
 
         # Filter by school if provided
         if school_id:
@@ -566,7 +566,7 @@ def admin_view_user_list_school_view(request):
         schools = MyModels.School.objects.all()  # Assuming your school model is called School
 
         # Pagination
-        paginator = Paginator(users, 12)
+        paginator = Paginator(users, 50)
         page_number = request.GET.get('page')
         users_paginated = paginator.get_page(page_number)
 

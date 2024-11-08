@@ -20,11 +20,20 @@
                     <li>
                         <a href="{% url 'student-list' %}">Student List</a>
                     </li>
+
                     <li>
-                        <a href="{% url 'create-student' %}">Create Student</a>
+                        <a href="{% url 'student-attendance' %}">Student Attendance</a>
                     </li>
+
+                    <li>
+                        <a href="{% url 'attendance-report' %}">Student Attendance Report</a>
+                    </li>
+                    
                     <li>
                         <a href="{% url 'student-list-pending' %}">Pending Student List</a>
+                    </li>
+                    <li>
+                        <a href="{% url 'create-student' %}">Create Student</a>
                     </li>
                     <li>
                         <a href="{% url 'upload-student-csv' %}">Upload Student CSV</a>

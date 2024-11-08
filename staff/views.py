@@ -399,6 +399,7 @@ def lesson_create(request):
             grade = request.POST.get('grade')
             module = request.POST.get('module')
             serialno = request.POST['serialno']
+            mints = request.POST['mints']
             heading = request.POST['heading']
             about = request.POST['about']
             reqmaterial = request.POST['reqmaterial']
@@ -410,6 +411,7 @@ def lesson_create(request):
             mode = MyModels.Lesson.objects.create(grade_id=grade,
                                                   module_id=module,
                                                   serialno = serialno,
+                                                  mints=mints,
                                                   heading=heading,
                                                   about=about,
                                                   reqmaterial=reqmaterial,
@@ -442,6 +444,7 @@ def lesson_update(request, id):
             grade = request.POST.get('grade')
             module = request.POST.get('module')
             serialno = request.POST['serialno']
+            mints = request.POST['mints']
             heading = request.POST['heading']
             about = request.POST['about']
             reqmaterial = request.POST['reqmaterial']
@@ -455,6 +458,7 @@ def lesson_update(request, id):
             les.grade_id = grade
             les.module = module
             les.serialno = serialno
+            les.mints = mints
             les.heading = heading
             les.about = about
             les.reqmaterial = reqmaterial
@@ -474,6 +478,7 @@ def lesson_update(request, id):
         grade = les.grade_id
         module = les.module_id
         serialno = les.serialno
+        mints = les.mints
         heading = les.heading
         about =  les.about 
         reqmaterial = les.reqmaterial 
@@ -487,6 +492,7 @@ def lesson_update(request, id):
             'grade': grade,
             'module': module,
             'serialno' :serialno,
+            'mints': mints,
             'heading': heading,
             'about': about,
             'reqmaterial': reqmaterial,
