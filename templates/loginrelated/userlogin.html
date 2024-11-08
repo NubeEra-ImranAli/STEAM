@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
-    <head>
+<html lang="en" class="h-100"> 
+<head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0">
-        <title>STEAM Education</title>
+        <title>Dreams LMS</title>
         <link rel="shortcut icon" type="image/x-icon" href="/static/drm/img/favicon.svg">
         <script src="/static/drm/js/theme-script.js" type="39161eece84e35759e215c36-text/javascript"></script>
         <link rel="stylesheet" href="/static/drm/css/bootstrap.min.css">
@@ -44,12 +44,12 @@
                                             placeholder="Enter your user name"
                                             required
                                         >
-                                    </div>
-                                    <div class="mb-3">
-                                        <label class="mb-1">
-                                            <strong class="fs-20 font-w800 text-red">Password</strong>
-                                        </label>
-                                        <input
+
+											 
+										</div>
+										<div class="mb-3">
+											<label class="mb-1"><strong>Password</strong></label>
+                                            <input
                                             name="password"
                                             id="password"
                                             type="password"
@@ -57,39 +57,54 @@
                                             placeholder="Enter your password"
                                             required
                                         >
-                                    </div>
-                                    <div class="text-center">
-                                        <button type="submit" class="btn btn-primary btn-block">Sign Me In</button>
-                                    </div>
-                                </form>
-                                {% if error_message %}
-                                <div class="alert alert-success" id="success-message">{{ error_message }}</div>
-                                {% endif %}
-                                <script>
-            // Wait for the DOM to load
-            document.addEventListener("DOMContentLoaded", function() {
-            // Select the success message
-            var message = document.getElementById("success-message");
-            if (message) {
-            // Set a timer to hide the message after 5 seconds (5000 ms)
-            setTimeout(function() {
-            message.style.display = 'none';
-            }, 5000);
-            }
-            });
-                                </script>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-<script src="/static/drm/js/jquery-3.7.1.min.js" type="39161eece84e35759e215c36-text/javascript"></script>
-<script src="/static/drm/js/bootstrap.bundle.min.js" type="39161eece84e35759e215c36-text/javascript"></script>
-<script src="/static/drm/js/owl.carousel.min.js" type="39161eece84e35759e215c36-text/javascript"></script>
-<script src="/static/drm/js/script.js" type="39161eece84e35759e215c36-text/javascript"></script>
-<script src="/cdn-cgi/scripts/7d0fa10a/cloudflare-static/rocket-loader.min.js" data-cf-settings="39161eece84e35759e215c36-|49" defer></script>
+											 
+										</div>
+                                        <div class="p-15">
+                                            {% if error_message %}
+                                            <div class="alert alert-danger " id="success-message">{{ error_message }}</div>
+                                            {% endif %}
+                                        </div>
+                                      
+
+										<div class="row d-flex justify-content-between mt-4 mb-2">
+											<div class="mb-3">
+											   <div class="form-check custom-checkbox ms-1">
+													<input type="checkbox" class="form-check-input" id="basic_checkbox_1">
+													<label class="form-check-label" for="basic_checkbox_1">Remember my preference</label>
+												</div>
+											</div>
+											<div class="mb-3">
+												<a href="#">Forgot Password?</a>
+											</div>
+										</div>
+										<div class="text-center">
+											<button type="submit" class="btn btn-primary btn-block">Sign In</button>
+										</div>
+									</form>
+                                   
+                                    <script>
+                                        // Wait for the DOM to load
+                                        document.addEventListener("DOMContentLoaded", function() {
+                                        // Select the success message
+                                        var message = document.getElementById("success-message");
+                                        if (message) {
+                                        // Set a timer to hide the message after 5 seconds (5000 ms)
+                                        setTimeout(function() {
+                                        message.style.display = 'none';
+                                        }, 5000);
+                                        }
+                                        });
+                                                            </script>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+ 
 </body>
+ 
 </html>

@@ -21262,9 +21262,7 @@ Fixing Order => Base + Typography >> General Layout + Grid >> Page Layout + Comp
 .custom_file_input .form-control {
   padding-left: 12px;
   line-height: 45px; }
-
-#username {
-  border-radius: 0 0.5rem 0.5rem 0; }
+ 
 
 .form-control-lg {
   min-height: 3.75rem;
@@ -24454,7 +24452,7 @@ button {
   position: relative;
   border: 0rem solid transparent;
   border-radius: 0.625rem;
-  box-shadow: 0rem 0.3125rem 0.3125rem 0rem rgba(82, 63, 105, 0.05);
+  box-shadow: 0.3rem 0.3125rem 0.3125rem 0.3rem rgba(82, 63, 105, 0.05);
   height: calc(100% - 30px); }
   @media only screen and (max-width: 35.9375rem) {
     .card {
@@ -26642,7 +26640,7 @@ table.dataTable thead th {
       font-size: 1rem; } }
 
 table.dataTable tbody td {
-  padding: 1.25rem 0.9375rem;
+  /* padding: 1.25rem 0.9375rem; */
   font-size: 1rem;
   font-weight: 400;
   border-bottom: 0; }
@@ -26806,6 +26804,11 @@ table.dataTable.row-border tbody td,
 table.dataTable.display tbody th,
 table.dataTable.display tbody td {
   border-color: #EEEEEE; }
+ 
+  table.dataTable.row-border tbody th, table.dataTable.row-border tbody td, table.dataTable.display tbody th, table.dataTable.display tbody td {
+    border-top: 1px solid #ddd;
+}
+ 
   [data-theme-version="dark"] table.dataTable.row-border tbody th, [data-theme-version="dark"]
   table.dataTable.row-border tbody td, [data-theme-version="dark"]
   table.dataTable.display tbody th, [data-theme-version="dark"]
@@ -31648,20 +31651,22 @@ html[dir="rtl"] [direction="rtl"][data-sidebar-style="compact"]:not([data-layout
   padding-right: 9.375rem; }
 
 :root {
-  --primary: #FF6A59;
+
+  --primary: #49b493; 
+  /* --primary: #FF6A59; */
   --secondary: #4CBC9A;
   --secondary-dark: #3a9b7e;
-  --primary-hover: #ff3c26;
-  --primary-dark: #bf1400;
-  --rgba-primary-1: rgba(255, 106, 89, 0.1);
-  --rgba-primary-2: rgba(255, 106, 89, 0.2);
-  --rgba-primary-3: rgba(255, 106, 89, 0.3);
-  --rgba-primary-4: rgba(255, 106, 89, 0.4);
-  --rgba-primary-5: rgba(255, 106, 89, 0.5);
-  --rgba-primary-6: rgba(255, 106, 89, 0.6);
-  --rgba-primary-7: rgba(255, 106, 89, 0.7);
-  --rgba-primary-8: rgba(255, 106, 89, 0.8);
-  --rgba-primary-9: rgba(255, 106, 89, 0.9);
+  --primary-hover: #3a9b7e;
+  --primary-dark: #bf1400; 
+  --rgba-primary-1: rgba(75, 184, 151, 0.1);
+  --rgba-primary-2: rgba(75, 184, 151, 0.2);
+  --rgba-primary-3: rgba(75, 184, 151, 0.3);
+  --rgba-primary-4: rgba(75, 184, 151, 0.4);
+  --rgba-primary-5: rgba(75, 184, 151, 0.5);
+  --rgba-primary-6: rgba(75, 184, 151, 0.6);
+  --rgba-primary-7: rgba(75, 184, 151, 0.7);
+  --rgba-primary-8: rgba(75, 184, 151, 0.8);
+  --rgba-primary-9: rgba(75, 184, 151, 0.9);
   --rgba-secondary-1: rgba(76, 188, 154, 0.1);
   --rgba-secondary-2: rgba(76, 188, 154, 0.2);
   --rgba-secondary-3: rgba(76, 188, 154, 0.3);
@@ -32563,3 +32568,16 @@ html[dir="rtl"] [direction="rtl"][data-sidebar-style="compact"]:not([data-layout
     background-color: transparent; }
     [data-theme-version="dark"] .footer .copyright p {
       color: #fff; }
+.p-15{
+  padding: 15px 0;
+}
+.white-bg{
+  background: white;
+}
+.DZ-theme-btn{
+  display: none;
+}
+.btn-search{
+  border: none;
+  background: none;
+}
