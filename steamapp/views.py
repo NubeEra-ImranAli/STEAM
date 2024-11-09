@@ -1,6 +1,7 @@
 from steamapp import models as MyModels
 from django.contrib import messages
-from django.db.models import Q, Count
+from django.db.models import Sum, F, Value, Q, Count, F, Case, When, IntegerField
+from django.db.models.functions import Coalesce
 from django.core.paginator import Paginator
 import os
 from django.db.models.functions import TruncDate
@@ -327,13 +328,14 @@ def user_dashboard_view(request):
             }
             return render(request,'student/student_dashboard.html',context=dict)
     elif str(request.session['utype']) == 'teacher':
+        # Get schedulers for the logged-in teacher and use Coalesce to replace None with 0 for status_sum
+        schedulers = MyModels.Scheduler.objects.filter(
+            teacher_id=request.user.id
+        ).annotate(
+            status_sum=Coalesce(Sum('schedulerstatus__status'), Value(0))
+        )
         dict={
-        'total_course':0,
-        'total_exam':0,
-        'total_shortExam':0, 
-        'total_question':0,
-        'total_short':0,
-        'total_learner':0,
+        'schedulers':schedulers
         }
         return render(request,'teacher/teacher_dashboard.html',context=dict)
     elif str(request.session['utype']) == 'staff':

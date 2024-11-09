@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from steamapp import models as MyModels
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.db.models import Exists, OuterRef,Case, When, Value, IntegerField,F, Value, Q
+from django.db.models import Exists, OuterRef,Case, When, Value, IntegerField,F, Value, Q, Sum
 from django.db.models.functions import Coalesce
 import json
 
@@ -34,6 +34,7 @@ def studykit(request):
             'module__id', 
             'module__module_name', 
             'heading',
+            'mints',
             'watched_status',
             'has_ques'
         ).order_by('module__module_name', 'serialno'))
@@ -420,3 +421,15 @@ def exam_running(request,exam_id):
             return render(request,'student/exam/exam_start.html',{'exam':exam,'questions':questions})
     except:
         return render(request,'lxpapp/404page.html')
+
+
+# List scheduler_calender
+@login_required
+def student_calender(request):
+    # Get schedulers for the logged-in teacher and use Coalesce to replace None with 0 for status_sum
+    schedulers = MyModels.Scheduler.objects.filter(
+        school_id = request.user.school_id,grade_id = request.user.grade_id,division_id = request.user.division_id
+    ).annotate(
+        status_sum=Coalesce(Sum('schedulerstatus__status'), Value(0))
+    )
+    return render(request, 'student/scheduler/student_calender.html', {'schedulers': schedulers})

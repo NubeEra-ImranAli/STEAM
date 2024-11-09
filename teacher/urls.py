@@ -25,4 +25,11 @@ urlpatterns = [
     path('examquestion/create/', views.examquestion_create, name='examquestion_create'),
     path('examquestion/update/<int:id>/', views.examquestion_update, name='examquestion_update'),
     path('examquestion/delete/<int:id>/', views.examquestion_delete, name='examquestion_delete'),
+
+    path('teacher-calender/', views.teacher_calender, name='teacher-calender'),
+
+    path('schedulerstatus/', views.schedulerstatus_list, name='schedulerstatus_list'),
+    path('schedulerstatus/create/', views.schedulerstatus_create, name='schedulerstatus_create'),
+    path('schedulerstatus/delete/<int:id>/', views.schedulerstatus_delete, name='schedulerstatus_delete'),
+
 ]

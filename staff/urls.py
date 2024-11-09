@@ -35,4 +35,14 @@ urlpatterns = [
     path('modulequestion/create/', views.modulequestion_create, name='modulequestion_create'),
     path('modulequestion/update/<int:id>/', views.modulequestion_update, name='modulequestion_update'),
     path('modulequestion/delete/<int:id>/', views.modulequestion_delete, name='modulequestion_delete'),
+    
+    path('scheduler/create/', views.create_scheduler, name='create_scheduler'),
+    path('scheduler/update/<int:scheduler_id>/', views.update_scheduler, name='update_scheduler'),
+    path('scheduler/list/', views.scheduler_list, name='scheduler_list'),
+    path('scheduler/calender/', views.scheduler_calender, name='scheduler_calender'),
+    path('scheduler/delete/<int:scheduler_id>/', views.delete_scheduler, name='delete_scheduler'),
+    path('get_teachers/<int:school_id>/', views.get_teachers, name='get_teachers'),
+    path('get_divisions/<int:grade_id>/', views.get_divisions, name='get_divisions'),
+    path('get_modulesbygrade/<int:grade_id>/', views.get_modulesbygrade, name='get_modulesbygrade'),
+    path('get_lessons/<int:module_id>/', views.get_lessons, name='get_lessons'),
 ]

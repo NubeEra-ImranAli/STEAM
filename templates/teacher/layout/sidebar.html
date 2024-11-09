@@ -63,7 +63,26 @@
                     
                 </ul>
             </li>
-
+            <li>
+                <a class="has-arrow " href="javascript:void(0);" aria-expanded="false">
+                    <i class="bi bi-heart"></i>
+                    <span class="nav-text">Scheduler Status</span>
+                </a>
+                <ul aria-expanded="false">
+                    <li>
+                        <a href="{% url 'schedulerstatus_list' %}">Scheduler Status List</a>
+                    </li>
+                    <li>
+                        <a href="{% url 'schedulerstatus_create' %}">Create Scheduler</a>
+                    </li>                 
+                </ul>
+            </li>
+            <li>
+                <a href="{% url 'teacher-calender' %}" class="" aria-expanded="false">
+                    <i class="bi bi-grid"></i>
+                    <span class="nav-text">Calender</span>
+                </a>
+            </li>
           
             <li>
                 <a href="{% url 'user-profile' %}" class="" aria-expanded="false">

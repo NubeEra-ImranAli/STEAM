@@ -189,3 +189,22 @@ class StudentAttendance(models.Model):
     date = models.DateField(auto_now=True)
     status = models.PositiveIntegerField(default=0)
 
+class Scheduler(models.Model): 
+    school=models.ForeignKey(School,on_delete=models.SET_NULL, null=True)
+    teacher=models.ForeignKey(User,on_delete=models.SET_NULL, null=True)
+    grade = models.ForeignKey(Grade, on_delete=models.SET_NULL, null=True)
+    division = models.ForeignKey(Division, on_delete=models.SET_NULL, null=True)
+    module = models.ForeignKey(Module, on_delete=models.SET_NULL, null=True)
+    lesson = models.ForeignKey(Lesson, on_delete=models.SET_NULL, null=True)
+    start = models.DateTimeField()
+    end = models.DateTimeField(null=True, blank=True)
+    all_day = models.BooleanField(default=False)
+    
+    def __str__(self):
+        return self.title
+    
+class SchedulerStatus(models.Model): 
+    date = models.DateField(auto_now=True)
+    scheduler=models.ForeignKey(Scheduler,on_delete=models.SET_NULL, null=True)
+    teacher=models.ForeignKey(User,on_delete=models.SET_NULL, null=True)
+    status=models.PositiveIntegerField(default=0)

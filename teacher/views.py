@@ -9,8 +9,7 @@ from steamapp.models import User
 from django.db import IntegrityError
 import csv
 from django.http import JsonResponse
-from django.db.models import  F, Value, Q
-from django.db.models import Count, F, Case, When, IntegerField
+from django.db.models import Sum, F, Value, Q, Count, F, Case, When, IntegerField
 from django.db.models.functions import Coalesce
 from datetime import datetime
 import json
@@ -36,7 +35,8 @@ def roman_to_int(roman):
             total += value
         prev_value = value
     return total
-
+    
+@login_required
 def student_list(request):
     if str(request.session['utype']) == 'teacher':
         # Get the 'search' and 'grade_id' parameters from the GET request
@@ -109,7 +109,7 @@ def student_attendance(request):
         division_id = request.GET.get('division_id', '')
 
         # Filter students based on search criteria
-        students = User.objects.all().filter(utype ='student',school_id = request.user.school_id)
+        students = User.objects.all().filter(utype ='student',school_id = request.user.school_id,status=True)
         if query:
             students = students.filter(first_name__icontains=query) | students.filter(last_name__icontains=query)
         if grade_id:
@@ -365,7 +365,7 @@ def attendance_report_view(request):
         division = MyModels.Division.objects.get(id =item['student__division']) 
 
         # Get the total number of students in this grade and division (from User model)
-        total_students = User.objects.filter(grade=grade, division=division, utype='student').count()
+        total_students = User.objects.filter(grade=grade, division=division, utype='student',status=True).count()
 
         # Get the attendance data for these students (filtered by date)
         students_in_division = attendance_data.filter(student__grade=grade, student__division=division)
@@ -412,7 +412,7 @@ def attendance_details(request, grade_id, division_id, date):
 
         # Query to get students with the given grade, division, and attendance date
         students_with_attendance = (
-            User.objects.filter(grade_id=grade_id, division_id=division_id, utype='student')
+            User.objects.filter(grade_id=grade_id, division_id=division_id, utype='student',status=True)
             .prefetch_related('studentattendance_set')  # Optimize query to access related attendance
         )
 
@@ -469,7 +469,7 @@ def exam_list(request):
 def exam_student_top(request,exam_id):
     if str(request.session['utype']) == 'teacher':
         # Get the top 10 students ordered by their marks in the most recent exam result
-        students = MyModels.ExamResult.objects.filter(exam_id=exam_id).order_by('-marks')[:10].values(
+        students = MyModels.ExamResult.objects.filter(exam_id=exam_id,student__status=True).order_by('-marks')[:10].values(
             'student__user_full_name',  # Student's full name
             'marks',                    # Marks
             'exam__id',                  # Exam ID
@@ -483,7 +483,7 @@ def exam_student_top(request,exam_id):
 def exam_student_marks_list(request,exam_id):
     if str(request.session['utype']) == 'teacher':
         # Query to get all students with their exam marks, or 0 if no result exists
-        students = User.objects.filter(utype='student').annotate(
+        students = User.objects.filter(utype='student',status=True).annotate(
     marks=Coalesce(
         F('examresult__marks'),
         Value(0)  # Default to 0 if no ExamResult exists
@@ -503,6 +503,7 @@ def exam_student_details_list(request,exam_id,student_id):
         if str(request.session['utype']) == 'teacher':
             # Pre-fetch related ExamResult for each ExamResultDetail
             exams = MyModels.ExamResultDetails.objects.all().filter(
+                examresult__student__status=True,
                 examresult__student_id=student_id,
                 examresult__exam_id=exam_id,
                 question_id__in=MyModels.ExamQuestion.objects.all()
@@ -694,4 +695,67 @@ def examquestion_delete(request, id):
         return redirect('examquestion_list')
     else:
         return render(request,'loginrelated/diffrentuser.html')
-    
+
+# List scheduler_calender
+@login_required
+def teacher_calender(request):
+    # Get schedulers for the logged-in teacher and use Coalesce to replace None with 0 for status_sum
+    schedulers = MyModels.Scheduler.objects.filter(
+        teacher_id=request.user.id
+    ).annotate(
+        status_sum=Coalesce(Sum('schedulerstatus__status'), Value(0))
+    )
+    return render(request, 'teacher/scheduler/teacher_calender.html', {'schedulers': schedulers})
+
+# Display list of schedulerstatus
+@login_required
+def schedulerstatus_list(request):
+    if str(request.session['utype']) == 'teacher':
+        schedulerstatus = MyModels.SchedulerStatus.objects.all()
+        return render(request, 'teacher/schedulerstatus/schedulerstatus_list.html', {'schedulerstatus': schedulerstatus})
+    else:
+        return render(request,'loginrelated/diffrentuser.html')
+
+# Create a new schedulerstatus
+@login_required
+def schedulerstatus_create(request):
+    if str(request.session['utype']) == 'teacher':
+        if request.method == 'POST':
+            scheduler = request.POST.get('scheduler')
+            status = request.POST.get('status')
+            tdate_str = request.POST.get('tdate')
+            status_sum = MyModels.SchedulerStatus.objects.filter(scheduler_id = scheduler).aggregate(Sum('status'))['status__sum']
+            if status_sum:
+                if (float(status_sum) + float(status)) > 100:
+                    messages.warning(request, 'Scheduler Status count getting more then 100. Previous total is ' + str(status_sum))
+                    return redirect('schedulerstatus_create')
+            try:
+                tdate = datetime.strptime(tdate_str, '%d-%m-%Y').date()
+            except ValueError:
+                return JsonResponse({"error": "Invalid date format"}, status=400)
+           
+            mode = MyModels.SchedulerStatus.objects.create(scheduler_id=scheduler,
+                                                  status=status,
+                                                  date = tdate
+                                                  )
+            mode.save()
+            messages.success(request, 'Scheduler Status created successfully!')
+            return redirect('schedulerstatus_create')
+        schedulers = MyModels.Scheduler.objects.filter(teacher_id = request.user.id)
+        
+        return render(request, 'teacher/schedulerstatus/schedulerstatus_create.html',{'schedulers':schedulers})
+    else:
+        return render(request,'loginrelated/diffrentuser.html')
+
+
+# Delete a schedulerstatus
+@login_required
+def schedulerstatus_delete(request, id):
+    if str(request.session['utype']) == 'teacher':
+        schedulerstatus = get_object_or_404(MyModels.SchedulerStatus, id=id)
+        # Now delete the schedulerstatus instance
+        schedulerstatus.delete()
+        
+        return redirect('schedulerstatus_list')
+    else:
+        return render(request,'loginrelated/diffrentuser.html')

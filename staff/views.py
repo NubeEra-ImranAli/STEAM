@@ -8,6 +8,8 @@ from django.conf import settings
 from django.views.decorators.csrf import csrf_exempt
 import json
 from django.http import JsonResponse
+from django.db.models import Exists, OuterRef,Case, When, Value, IntegerField,F, Value, Q, Sum, Max
+from django.db.models.functions import Coalesce
 
 ROMAN_NUMERAL_MAP = {
                         'V': 5,
@@ -629,4 +631,136 @@ def modulequestion_delete(request, id):
         return redirect('modulequestion_list')
     else:
         return render(request,'loginrelated/diffrentuser.html')
+
+
+# Create Scheduler
+@login_required
+def create_scheduler(request):
+    if request.method == 'POST':
+        school_id = request.POST.get('school')
+        teacher_id = request.POST.get('teacher')
+        grade_id = request.POST.get('grade')
+        division_id = request.POST.get('division')
+        module_id = request.POST.get('module')
+        lesson_id = request.POST.get('lesson')
+        start = request.POST.get('start')
+        end = request.POST.get('end')
+        all_day = request.POST.get('all_day') == 'on'
+
+        scheduler = MyModels.Scheduler(
+            school=MyModels.School.objects.get(id=school_id),
+            teacher=MyModels.User.objects.get(id=teacher_id),
+            grade=MyModels.Grade.objects.get(id=grade_id),
+            division=MyModels.Division.objects.get(id=division_id),
+            module=MyModels.Module.objects.get(id=module_id),
+            lesson=MyModels.Lesson.objects.get(id=lesson_id),
+            start=start,
+            end=end,
+            all_day=all_day
+        )
+        scheduler.save()
+        return redirect('scheduler_list')
     
+    schools = MyModels.School.objects.all()
+    grades = MyModels.Grade.objects.all()
+    return render(request, 'staff/scheduler/create_scheduler.html', {'schools': schools,'grades': grades})
+
+
+@login_required
+def update_scheduler(request, scheduler_id):
+    # Get the Scheduler object to be updated
+    scheduler = get_object_or_404(MyModels.Scheduler, id=scheduler_id)
+    
+    if request.method == "POST":
+        # Process the form data
+        school_id = request.POST.get('school')
+        teacher_id = request.POST.get('teacher')
+        grade_id = request.POST.get('grade')
+        division_id = request.POST.get('division')
+        title = request.POST.get('title')
+        start = request.POST.get('start')
+        end = request.POST.get('end')
+        all_day = 'all_day' in request.POST
+        
+        # Update the scheduler instance
+        scheduler.school = MyModels.School.objects.get(id=school_id)
+        scheduler.teacher = MyModels.User.objects.get(id=teacher_id)
+        scheduler.grade = MyModels.Grade.objects.get(id=grade_id)
+        scheduler.division = MyModels.Division.objects.get(id=division_id)
+        scheduler.title = title
+        scheduler.start = start
+        scheduler.end = end if end else None
+        scheduler.all_day = all_day
+        
+        scheduler.save()
+        
+        messages.success(request, 'Scheduler updated successfully!')
+        return redirect('scheduler_list')  # Redirect to the scheduler list or another page as needed
+
+    else:
+        # GET request: Fetch data for the form
+        schools = MyModels.School.objects.all()
+        teachers = MyModels.User.objects.filter(school=scheduler.school)  # Assuming a user (teacher) is linked to a school
+        grades = MyModels.Grade.objects.all()
+        divisions = MyModels.Division.objects.all()
+
+        # Return the form with current scheduler data
+        context = {
+            'scheduler': scheduler,
+            'schools': schools,
+            'teachers': teachers,
+            'grades': grades,
+            'divisions': divisions,
+        }
+        return render(request, 'staff/scheduler/update_scheduler.html', context)
+    
+# List all Schedulers
+@login_required
+def scheduler_list(request):
+    schedulers = MyModels.Scheduler.objects.all()
+    return render(request, 'staff/scheduler/scheduler_list.html', {'schedulers': schedulers})
+
+
+# List scheduler_calender
+@login_required
+def scheduler_calender(request):
+    # Get schedulers for the logged-in teacher and use Coalesce to replace None with 0 for status_sum
+    schedulers = MyModels.Scheduler.objects.annotate(
+        status_sum=Coalesce(Sum('schedulerstatus__status'), Value(0)),
+        completion_date=Case(
+            When(status_sum__gte=100, then=Max('schedulerstatus__date')),
+            default=Value(None),
+        )
+    )
+    return render(request, 'staff/scheduler/scheduler_calender.html', {'schedulers': schedulers})
+
+# Get Teachers based on selected School
+@login_required
+def get_teachers(request, school_id):
+    teachers = MyModels.User.objects.filter(school_id=school_id, utype='teacher')
+    return JsonResponse([{'id': teacher.id, 'name': teacher.user_full_name} for teacher in teachers], safe=False)
+
+# Get Divisions based on selected Grade
+@login_required
+def get_divisions(request, grade_id):
+    divisions = MyModels.Division.objects.all()  # Adjust logic if needed
+    return JsonResponse([{'id': division.id, 'name': division.division_name} for division in divisions], safe=False)
+
+# Get Module based on selected Grade
+@login_required
+def get_modulesbygrade(request, grade_id):
+    modules = MyModels.Module.objects.all().filter(grade_id=grade_id)  # Adjust logic if needed
+    return JsonResponse([{'id': module.id, 'name': module.module_name} for module in modules], safe=False)
+
+# Get Lesson based on selected Grade and Module
+@login_required
+def get_lessons(request, module_id):
+    lessons = MyModels.Lesson.objects.all().filter(module_id=module_id)  # Adjust logic if needed
+    return JsonResponse([{'id': lesson.id, 'name': lesson.heading} for lesson in lessons], safe=False)
+
+# Delete Scheduler
+@login_required
+def delete_scheduler(request, scheduler_id):
+    scheduler = get_object_or_404(MyModels.Scheduler, id=scheduler_id)
+    scheduler.delete()
+    return redirect('scheduler_list')    

@@ -99,6 +99,24 @@
                     </li>
                 </ul>
             </li>
+
+            <li>
+                <a class="has-arrow " href="javascript:void(0);" aria-expanded="false">
+                    <i class="bi bi-heart"></i>
+                    <span class="nav-text">Scheduler</span>
+                </a>
+                <ul aria-expanded="false">
+                    <li>
+                        <a href="{% url 'scheduler_list' %}">Scheduler List</a>
+                    </li>
+                    <li>
+                        <a href="{% url 'scheduler_calender' %}">Scheduler Calender</a>
+                    </li>
+                    <li>
+                        <a href="{% url 'create_scheduler' %}">Create Scheduler</a>
+                    </li>
+                </ul>
+            </li>
             <HR>
             <a href="{% url 'user-profile' %}" class="" aria-expanded="false">
                 <i class="fa fa-user"></i>

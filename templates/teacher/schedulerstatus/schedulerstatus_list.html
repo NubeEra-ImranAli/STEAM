@@ -1,0 +1,80 @@
+{% extends 'teacher/teacherbase.html' %}
+{% block content %}
+{% load static %}
+<link rel="stylesheet" href="/static/get/css/style.css">
+<style>
+  ol.breadcrumb li+li:before {
+    content: '\f061';
+  display: inline-block;
+  font-family: 'fontAwesome';
+  padding: 0 10px;
+  }
+</style>
+<div>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li>
+                <a href="{% url 'user-dashboard' %}">Dashboard</a>
+            </li>
+            <li>
+                <a href="{% url 'schedulerstatus_create' %}">New Scheduler Status</a>
+            </li>
+            <li aria-current="page">View Scheduler Statuss</li>
+           
+        </ol>
+    </nav>
+</div>
+{% if messages %}
+    {% for message in messages %}
+<div class="alert alert-info" id="success-message">{{ message }}</div>
+{% endfor %}
+{% endif %}
+<script>
+    // Wait for the DOM to load
+    document.addEventListener("DOMContentLoaded", function() {
+        // Select the success message
+        var message = document.getElementById("success-message");
+        if (message) {
+            // Set a timer to hide the message after 5 seconds (5000 ms)
+            setTimeout(function() {
+                message.style.display = 'none';
+            }, 5000);
+        }
+    });
+</script>
+<div class="card">
+    <div class="table-responsive">
+<table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+    <thead>
+        <tr>
+            <th>Grade</th>
+            <th>Division</th>
+            <th>Module</th>
+            <th>Lesson</th>
+            <th>Status Date</th>
+            <th>Status</th>
+            <th>Delete</th>
+        </tr>
+    </thead>
+    <tbody >
+        {% for t in schedulerstatus %}
+        <td>{{ t.scheduler.grade.grade_name }}</td>
+        <td>{{ t.scheduler.division.division_name }}</td>
+        <td>{{ t.scheduler.module.module_name }}</td>
+        <td>{{ t.scheduler.lesson.heading }}</td>
+        <td>{{ t.date }}</td>
+        <td>{{ t.status }}</td>
+            
+            <td>
+                <a class="btn btn-danger btn-xs" href="{% url 'schedulerstatus_delete' t.id %}" onclick="return confirm('Are you sure?')">
+                    <span class="far fa-trash-alt"></span>
+                </a>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+    </div>
+</div>
+{% endblock content %}

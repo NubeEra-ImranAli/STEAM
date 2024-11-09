@@ -50,6 +50,13 @@
       <div class="card">
         <div id="lesson-details" class="card-body">
           <div id="player" style="display: none"></div>
+
+          <div id="video-info">
+            <p>Current time: <span id="current-time">0</span> seconds</p>
+            <p>Video duration: <span id="duration">0</span> seconds</p>
+            <p>Video watched: <span id="watched">No</span></p>
+          </div>
+
           <img
             id="video-placeholder"
             src="/static/image/girls_working.jpeg"
@@ -213,7 +220,7 @@
               aria-controls="collapse{{ forloop.counter }}"
             >
               <span class="acc-heading">{{ module_name }}</span>
-              <span class="ms-auto">({{ lessons|length }})</span>
+              <span class="ms-auto">Total Lessons : ({{ lessons|length }})</span>
             </button>
           </h2>
           <div
@@ -234,23 +241,22 @@
                       </svg>
                     </span>	
                     <h4
-                    class="m-0"
+                    class="m-0 lesson-heading"
+                  data-lesson-id="{{ lesson.id }}"
                   >
                   {% else %}
                   <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M11.3337 6V4.66666C11.3337 2.79999 9.86699 1.33333 8.00033 1.33333C6.13366 1.33333 4.66699 2.79999 4.66699 4.66666V6C3.53366 6 2.66699 6.86666 2.66699 8V12.6667C2.66699 13.8 3.53366 14.6667 4.66699 14.6667H11.3337C12.467 14.6667 13.3337 13.8 13.3337 12.6667V8C13.3337 6.86666 12.467 6 11.3337 6ZM6.00033 4.66666C6.00033 3.53333 6.86699 2.66666 8.00033 2.66666C9.13366 2.66666 10.0003 3.53333 10.0003 4.66666V6H6.00033V4.66666ZM8.66699 11.3333C8.66699 11.7333 8.40033 12 8.00033 12C7.60033 12 7.33366 11.7333 7.33366 11.3333V9.33333C7.33366 8.93333 7.60033 8.66666 8.00033 8.66666C8.40033 8.66666 8.66699 8.93333 8.66699 9.33333V11.3333Z" fill="#374557"></path>
                   </svg>
                   </span>	
-                  <h4
-                  class="m-0 lesson-heading"
-                  data-lesson-id="{{ lesson.id }}"
-
-                >
+                  <h4 class="m-4">
                   {% endif %}
-                  {{ lesson.heading }}</h4>
+                  
+                  {{ lesson.heading }}  </h4>
 
                   
                   </div>	
+                  <span> (Mints {{ lesson.mints }}) </span>
                 </div>
               </div>
               {% endfor %}

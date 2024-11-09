@@ -105,7 +105,7 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.NOTICE('Creating Lessons...'))
         video_ids = [
-            "dQw4w9WgXcQ",
+            "e6MhFghdQps",
             "3JZ_D3ELwOQ",
             "L_jWHffIx5E",
             "kJQP7kiw5Fk",
@@ -136,6 +136,7 @@ class Command(BaseCommand):
                 grade_id = 1,
                 module_id = 1,
                 serialno = i +1,
+                mints = 60,
                 heading = f'Heading {i+1}',
                 about = ' <div class="mb-4">\
                 <h3 class="text-success">About STEAM and IoT</h3>\
@@ -175,6 +176,7 @@ class Command(BaseCommand):
                 grade_id = 1,
                 module_id = 2,
                 serialno = i +1,
+                mints = 60,
                 heading = f'Heading {i+12}',
                 about = ' <div class="mb-4">\
                 <h3 class="text-success">About STEAM and IoT</h3>\
@@ -214,6 +216,7 @@ class Command(BaseCommand):
                 grade_id = 1,
                 module_id = 3,
                 serialno = i +1,
+                mints = 60,
                 heading = f'Heading {i+32}',
                 about = ' <div class="mb-4">\
                 <h3 class="text-success">About STEAM and IoT</h3>\

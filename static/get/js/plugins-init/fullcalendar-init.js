@@ -53,7 +53,7 @@ function fullCalender(){
 			  arg.draggedEl.parentNode.removeChild(arg.draggedEl);
 			}
 		  },
-		  initialDate: '2021-02-13',
+		  initialDate: '2024-11-13',
 			  weekNumbers: true,
 			  navLinks: true, // can click day/week names to navigate views
 			  editable: true,
@@ -62,33 +62,40 @@ function fullCalender(){
 		   events: [
 				{
 				  title: 'All Day Event',
-				  start: '2021-02-01'
+				  start: '2024-11-01'
 				},
 				{
 				  title: 'Long Event',
-				  start: '2021-02-07',
-				  end: '2021-02-10',
+				  start: '2024-11-07',
+				  end: '2024-11-10',
 				  className: "bg-danger"
 				},
 				{
 				  groupId: 999,
 				  title: 'Repeating Event',
-				  start: '2021-02-09T16:00:00'
+				  start: '2024-11-09T16:00:00'
 				},
 				{
-				  groupId: 999,
-				  title: 'Repeating Event',
-				  start: '2021-02-16T16:00:00'
-				},
+					groupId: 999,
+					title: 'Imran Ali Khan',
+					start: '2024-11-16T00:00:00',
+					end: '2024-11-25T13:50:00'
+				  },
+				  {
+					groupId: 999,
+					title: 'Shahed Ali Khan',
+					start: '2024-11-25T13:51:00',
+					end: '2024-11-25T23:59:59'
+				  },
 				{
 				  title: 'Conference',
-				  start: '2021-02-11',
-				  end: '2021-02-13',
+				  start: '2024-11-11',
+				  end: '2024-11-13',
 				  className: "bg-danger"
 				},
 				{
 				  title: 'Lunch',
-				  start: '2021-02-12T12:00:00'
+				  start: '2024-11-12T12:00:00'
 				},
 				{
 				  title: 'Meeting',
@@ -100,18 +107,18 @@ function fullCalender(){
 				},
 				{
 				  title: 'Dinner',
-				  start: '2021-02-12T20:00:00',
+				  start: '2024-11-12T20:00:00',
 				  className: "bg-warning"
 				},
 				{
 				  title: 'Birthday Party',
-				  start: '2021-02-13T07:00:00',
+				  start: '2024-11-13T07:00:00',
 				  className: "bg-secondary"
 				},
 				{
 				  title: 'Click for Google',
 				  url: 'http://google.com/',
-				  start: '2021-02-28'
+				  start: '2024-11-28'
 				}
 			  ]
 		});
