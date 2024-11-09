@@ -725,17 +725,26 @@ def schedulerstatus_create(request):
             status = request.POST.get('status')
             tdate_str = request.POST.get('tdate')
             status_sum = MyModels.SchedulerStatus.objects.filter(scheduler_id = scheduler).aggregate(Sum('status'))['status__sum']
+            value = status
             if status_sum:
-                if (float(status_sum) + float(status)) > 100:
-                    messages.warning(request, 'Scheduler Status count getting more then 100. Previous total is ' + str(status_sum))
+                if (float(status) < float(status_sum)) :
+                    messages.warning(request, 'Scheduler Status count should be greater then Previous, total is ' + str(status_sum))
                     return redirect('schedulerstatus_create')
+                value = float(status) - float(status_sum)
+                if value > 100:
+                    messages.warning(request, 'Scheduler Status count getting more then 100. Previous total is ' + str(status_sum))
+                    return redirect('schedulerstatus_create') 
+                if value == 0:
+                    messages.warning(request, 'Scheduler Status count already marked as completed.' )
+                    return redirect('schedulerstatus_create') 
             try:
                 tdate = datetime.strptime(tdate_str, '%d-%m-%Y').date()
             except ValueError:
                 return JsonResponse({"error": "Invalid date format"}, status=400)
            
             mode = MyModels.SchedulerStatus.objects.create(scheduler_id=scheduler,
-                                                  status=status,
+                                                           teacher_id = request.user.id,
+                                                  status=value,
                                                   date = tdate
                                                   )
             mode.save()
@@ -747,7 +756,25 @@ def schedulerstatus_create(request):
     else:
         return render(request,'loginrelated/diffrentuser.html')
 
+@login_required
+def get_scheduler_status_sum(request):
+    # Check if the request is AJAX using the appropriate header
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        scheduler_id = request.GET.get("scheduler_id")
+        
+        # Get the sum of 'status' values for the given scheduler
+        status_sum = MyModels.SchedulerStatus.objects.filter(scheduler_id=scheduler_id).aggregate(Sum('status'))['status__sum']
+        
+        # If no statuses exist, set sum to 0
+        if status_sum is None:
+            status_sum = 0
 
+        # Log the status_sum for debugging (you can remove this in production)
+        print(f"Scheduler ID: {scheduler_id}, Status Sum: {status_sum}")  # Add print statement to check
+        
+        return JsonResponse({"status_sum": status_sum})
+
+    return JsonResponse({"error": "Invalid request"}, status=400)
 # Delete a schedulerstatus
 @login_required
 def schedulerstatus_delete(request, id):

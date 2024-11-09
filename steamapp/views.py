@@ -15,6 +15,8 @@ from django.contrib.auth import update_session_auth_hash
 from django.contrib.auth.signals import user_logged_in, user_logged_out
 from django.dispatch import receiver
 from datetime import datetime
+from django.utils import timezone
+from datetime import timedelta
 login_time = datetime.now()
 logout_time  = datetime.now()
 from django.http import HttpResponse
@@ -328,14 +330,23 @@ def user_dashboard_view(request):
             }
             return render(request,'student/student_dashboard.html',context=dict)
     elif str(request.session['utype']) == 'teacher':
-        # Get schedulers for the logged-in teacher and use Coalesce to replace None with 0 for status_sum
+        now = timezone.now()
+        start_of_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        end_of_month = (start_of_month + timedelta(days=32)).replace(day=1) - timedelta(days=1)
+        # Filter schedulers for the current month and the sum of associated statuses < 100
         schedulers = MyModels.Scheduler.objects.filter(
-            teacher_id=request.user.id
+            teacher_id=request.user.id,
+            start__gte=start_of_month,  # Filter for start date >= first day of the month
+            start__lte=end_of_month,    # Filter for start date <= last day of the month
         ).annotate(
             status_sum=Coalesce(Sum('schedulerstatus__status'), Value(0))
+        ).filter(
+            status_sum__lt=100  # Only include schedulers where the status sum is less than 100
         )
-        dict={
-        'schedulers':schedulers
+
+        # Create the context dictionary
+        dict = {
+            'schedulers': schedulers
         }
         return render(request,'teacher/teacher_dashboard.html',context=dict)
     elif str(request.session['utype']) == 'staff':

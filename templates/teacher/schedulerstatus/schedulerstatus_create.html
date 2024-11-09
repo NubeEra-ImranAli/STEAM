@@ -9,6 +9,13 @@
   font-family: 'fontAwesome';
   padding: 0 10px;
   }
+  #status {
+        width: 100%;
+    }
+    #status_sum_display {
+        font-size: 14px;
+        color: #666;
+    }
 </style>
 	<!-- ckeditor -->
 	<script src="/static/ckeditor/ckeditor.js"></script>
@@ -57,13 +64,12 @@
                     <h4 class="card-title">Create Scheduler Status</h4>
                 </div>
                 <div class="card-body">
-                    {% csrf_token %}
                     <div class="basic-form">
                         <div class="row">
                             <div class="mb-6 col-md-6">
                                 <label class="form-label" for="tdate">Date</label>
-                                <input type="text" class="form-control" name="tdate" id="tdate" placeholder="Select Date"
-                                value="{{ tdate }}"></div>
+                                <input type="text" class="form-control" name="tdate" id="tdate" placeholder="Select Date" value="{{ tdate }}">
+                            </div>
                             <div class="mb-6 col-md-6">
                                 <label class="form-label" for="scheduler">Scheduler</label>
                                 <select class="form-control" id="scheduler" name="scheduler" required>
@@ -73,16 +79,15 @@
                                     {% endfor %}
                                 </select>
                             </div>
+                        </div>
                         <div class="row">
                             <div class="mb-6 col-md-6">
-                                <label class="form-label" for="status">status</label>
-                                <input type="number" class="form-control" id="status" name="status" required>
-                                    
+                                <label class="form-label" for="status">Status</label>
+                                <input type="range" class="form-control" id="status" value="0" name="status" min="0" max="100" required>
+                                <p id="status_sum_display">Previous Sum: 0</p>
+                                <p id="current_status_display">Current Value: 0</p>
                             </div>
                         </div>
-                        </div>
-                        <!-- Date Picker -->
-        
                         <button type="submit" class="btn btn-primary">Create</button>
                     </div>
                 </div>
@@ -90,6 +95,7 @@
         </div>
     </div>
 </form>
+
 <!-- Include Flatpickr JS -->
 <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
 
@@ -103,12 +109,60 @@
             firstDayOfWeek: 1 // Start the calendar on Monday (optional)
         }
     });
+
+    // Track the previous value of the slider
+    let previousValue = 0;
+
+    // Handle slider change event
+    document.getElementById('status').addEventListener('input', function() {
+        const slider = document.getElementById('status');
+        const currentValue = slider.value;
+
+        // Update the previous value display
+        document.getElementById('current_status_display').innerText = `Current Value: ${currentValue}`;
+
+        // Update the previous value to current for the next time
+        previousValue = currentValue;
+    });
+
+    // Handle scheduler selection change
+    document.addEventListener("DOMContentLoaded", function() {
+        document.getElementById('scheduler').addEventListener('change', function() {
+            var schedulerId = this.value;
+
+            if (schedulerId) {
+                var url = "{% url 'get_scheduler_status_sum' %}";  // Django's URL tag to get the correct URL
+                fetch(`${url}?scheduler_id=${schedulerId}`, {
+                    method: 'GET',
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status_sum !== undefined) {
+                        var statusSum = data.status_sum;
+                        document.getElementById('status_sum_display').innerText = `Previous Sum: ${statusSum}`;
+                        document.getElementById('status').value = statusSum;
+                        
+                        
+                        document.getElementById('current_status_display').innerText = `Current Value: ${statusSum}`;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching status sum:', error);
+                });
+            }
+        });
+    });
 </script>
+
 <script>
     $(document).ready(function() {
-        // Initialize the datepicker
         $('#tdate').datepicker({
-            format: 'dd-mm-yyyy',  // Ensure this matches the date format you're using
+            format: 'dd-mm-yyyy',
             autoclose: true,
             todayHighlight: true
         });

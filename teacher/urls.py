@@ -31,5 +31,6 @@ urlpatterns = [
     path('schedulerstatus/', views.schedulerstatus_list, name='schedulerstatus_list'),
     path('schedulerstatus/create/', views.schedulerstatus_create, name='schedulerstatus_create'),
     path('schedulerstatus/delete/<int:id>/', views.schedulerstatus_delete, name='schedulerstatus_delete'),
+    path('get-scheduler-status-sum/', views.get_scheduler_status_sum, name='get_scheduler_status_sum'),
 
 ]

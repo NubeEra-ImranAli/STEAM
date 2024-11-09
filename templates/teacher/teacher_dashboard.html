@@ -7,124 +7,100 @@
     text-align: center;
     /* Center text inside the modal */
   }
+   /* Optional custom styling for progress bars */
+   .progress-bar {
+            text-align: center;
+            font-weight: bold;
+        }
+        .progress-container {
+            margin-bottom: 20px;
+        }
 </style>
 
 <div class="row">
   <div class="col-12">
+    {% if schedulers %}
     <div class="col-xl-6 ">
+      
       <div class="card">
-        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-        <canvas id="schedulerChart" width="600" height="400"></canvas>
-        <script>
-          // Scheduler event data from your server-side template
-          const schedulerEvents = [{% for scheduler in schedulers %} {
-              title: "{{ scheduler.lesson.heading }}",
-              start: "{{ scheduler.start|date:'Y-m-d\\TH:i:s' }}",
-              end: "{{ scheduler.end|date:'Y-m-d\\TH:i:s' }}",
-              extendedProps: {
-                Grade: "{{ scheduler.grade.grade_name }}",
-                Division: "{{ scheduler.division.division_name }}",
-                Module: "{{ scheduler.module.module_name }}",
-                Lesson: "{{ scheduler.lesson.heading }}",
-                StatusSum: "{{ scheduler.status_sum|default:0 }}", // This is the progress value
-              }
-            },
-            {% endfor %}
-          ];
-          // Prepare data for the chart
-          const labels = schedulerEvents.map(event => event.title); // Extract titles for the labels (X-axis)
-          const data = schedulerEvents.map(event => Math.min(100, Math.max(0, event.extendedProps
-          .StatusSum))); // Extract progress as data (Y-axis)
-          // Chart.js configuration
-          const config = {
-            type: 'bar', // Vertical bar chart
-            data: {
-              labels: labels, // Event titles as labels
-              datasets: [{
-                label: 'Progress (%)', // Chart label
-                data: data, // Progress data for each event
-                backgroundColor: '#4caf50', // Color of the bars
-                borderColor: '#388e3c', // Border color for the bars
-                borderWidth: 1, // Border width
-              }]
-            },
-            options: {
-              responsive: true,
-              plugins: {
-                legend: {
-                  display: false, // Hides the legend
-                },
-                tooltip: {
-                  // Customize tooltips
-                  enabled: true, // Enable tooltips
-                  callbacks: {
-                    // Customize the content of the tooltip
-                    label: function(tooltipItem) {
-                      const index = tooltipItem.dataIndex;
-                      const event = schedulerEvents[index];
-                      const progress = data[index];
-                      return `${event.title}: ${progress}%`; // Display lesson name and progress percentage
-                    },
-                    title: function(tooltipItem) {
-                      const index = tooltipItem[0].dataIndex;
-                      const event = schedulerEvents[index];
-                      return `${event.title}`; // Title of the event
-                    },
-                    afterBody: function(tooltipItem) {
-                      const index = tooltipItem[0].dataIndex;
-                      const event = schedulerEvents[index];
-                      // Adding more info like Grade, Division, etc.
-                      return `Grade: ${event.extendedProps.Grade}\nDivision: ${event.extendedProps.Division}\nModule: ${event.extendedProps.Module}`;
-                    }
-                  },
-                  // Tooltip styling options (optional)
-                  backgroundColor: '#333', // Dark background for tooltips
-                  titleColor: '#fff', // White title text color
-                  bodyColor: '#fff', // White body text color
-                  borderColor: '#888', // Border color of tooltip
-                  borderWidth: 1, // Border width of tooltip
-                  padding: 10, // Padding inside the tooltip
-                }
+        <div class="container">
+          <h1 class="text-center my-4">Lesson Progress</h1>
+  
+          <!-- Loop over events and display progress bars -->
+          <div id="progressBars"></div>
+      </div>
+  
+      <!-- jQuery (Bootstrap JS dependency) -->
+      <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+      
+      <!-- Bootstrap JS for interactivity -->
+      <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+  
+      <script>
+          // Sample scheduler event data (replace with your server-side template data)
+          const schedulerEvents = [
+              {% for scheduler in schedulers %}
+              {
+                  title: "{{ scheduler.lesson.heading }}",
+                  start: "{{ scheduler.start|date:'Y-m-d\\TH:i:s' }}",
+                  end: "{{ scheduler.end|date:'Y-m-d\\TH:i:s' }}",
+                  extendedProps: {
+                      Grade: "{{ scheduler.grade.grade_name }}",
+                      Division: "{{ scheduler.division.division_name }}",
+                      Module: "{{ scheduler.module.module_name }}",
+                      Lesson: "{{ scheduler.lesson.heading }}",
+                      StatusSum: "{{ scheduler.status_sum|default:0 }}"  // Progress value (0-100)
+                  }
               },
-              scales: {
-                x: {
-                  beginAtZero: true, // Start the X-axis at 0
-                  title: {
-                    display: true,
-                    text: 'Lesson' // X-axis title
-                  },
-                  ticks: {
-                    autoSkip: true, // Automatically skips labels if there are too many
-                    maxRotation: 45, // Rotate the labels if needed
-                    minRotation: 45, // Minimum rotation angle for the labels
-                  }
-                },
-                y: {
-                  beginAtZero: true, // Start the Y-axis at 0
-                  max: 100, // Set the maximum Y value to 100 for percentage
-                  title: {
-                    display: true,
-                    text: 'Progress (%)' // Y-axis title
-                  }
-                }
-              }
-            }
-          };
-          // Render the chart on the canvas
-          const ctx = document.getElementById('schedulerChart').getContext('2d');
-          const schedulerChart = new Chart(ctx, config);
-        </script>
-        <!-- jQuery -->
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-        <!-- Bootstrap JS -->
-        <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
+              {% endfor %}
+          ];
+          // List of Bootstrap progress bar background classes
+        const progressBarColors = [
+            'bg-success',   // Green
+            'bg-info',      // Light blue
+            'bg-warning',   // Yellow
+            'bg-danger',    // Red
+            'bg-primary',   // Blue
+            'bg-secondary', // Gray
+            'bg-light',     // Light gray
+            'bg-dark'       // Dark gray
+        ];
 
-        <link href="/static/get/vendor/fullcalendar/css/main.min.css" rel="stylesheet" />
+        // Function to get a random Bootstrap color class for the progress bar
+        function getRandomProgressBarColor() {
+            const randomIndex = Math.floor(Math.random() * progressBarColors.length);
+            return progressBarColors[randomIndex];
+        }
+          // Function to render progress bars
+          function renderProgressBars(events) {
+              const container = document.getElementById('progressBars');
+              events.forEach(event => {
+                  const progress = Math.min(100, Math.max(0, event.extendedProps.StatusSum));  // Ensure progress is within 0-100%
+                  const randomColorClass = getRandomProgressBarColor();
+                  const progressBarHTML = `
+                      <div class="progress-container">
+                          <h5>${progress} % | Grade: ${event.extendedProps.Grade} | Division: ${event.extendedProps.Division} | Module: ${event.extendedProps.Module} | Lesson :  ${event.title}</h5>
+                          <div class="progress">
+                               <div class="progress-bar ${randomColorClass}" role="progressbar" style="width: ${progress}%" aria-valuenow="${progress}" aria-valuemin="0" aria-valuemax="100">
+                              </div>
+                          </div>
+                      </div>
+                  `;
+                  
+                  container.innerHTML += progressBarHTML;  // Append each progress bar to the container
+              });
+          }
+  
+          // Call the function to render the progress bars on the page
+          renderProgressBars(schedulerEvents);
+      </script>
 
       </div>
     </div>
+    {% endif %}
     <div class="col-xl-6 ">
       <div class="card">
+        <link href="/static/get/vendor/fullcalendar/css/main.min.css" rel="stylesheet" />
 
         <div class="card-body">
           <div id="calendar" class="app-fullcalendar fc fc-media-screen fc-direction-ltr fc-theme-standard"></div>
