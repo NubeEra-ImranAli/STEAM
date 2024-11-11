@@ -21,15 +21,14 @@
 
 <div class="card students-list">
     <div class="card-header border-0 flex-wrap pb-0">
-        <h1>Attendance for {{ grade_name }} - {{ division_name }} on {{ attendance_date }}</h1>
+        <h1>Attendance for Class : {{ grade_name }} ({{ division_name }}) on {{ attendance_date }}</h1>
     </div>
 
     {% if students_data %}
     <div class="table-responsive">
-        <table class="table display mb-4">
+        <table class="table">
             <thead>
                 <tr>
-                    <th>id</th>
                     <th>Name</th>
                     <th>Roll Number</th>
                     <th>Attendance Status</th>
@@ -38,8 +37,7 @@
             <tbody>
                 {% for student in students_data %}
                     <tr>
-                        <td>{{ student.id }}</td>
-                        <td>{{ student.user_full_name }}</td>
+                        <td >{{ student.user_full_name }}</td>
                         <td>{{ student.roll_no }}</td>
                         <td>{{ student.attendance_status }}</td>
                     </tr>

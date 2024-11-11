@@ -3,15 +3,12 @@ from steamapp import models as MyModels
 import random
 
 class Command(BaseCommand):
-
-    def get_random_video_id():
-        
-        return random.choice(video_ids)
     help = 'Create a Demo schools and grades'
 
     def handle(self, *args, **kwargs):
         self.stdout.write(self.style.NOTICE('Creating Schools...'))
         for i in range (26):
+            self.stdout.write(self.style.NOTICE(f'Creating School {i}'))
             MyModels.School.objects.create(
                 school_name = f'School {i}',
                 contact_person = f'Sir {i}',
@@ -82,6 +79,7 @@ class Command(BaseCommand):
 
         self.stdout.write(self.style.NOTICE('Creating Modules...'))
         for i in range (5):
+            self.stdout.write(self.style.NOTICE(f'Creating Module {i +1}'))
             MyModels.Module.objects.create(
                 grade_id = 1,
                 module_name = f'Module {i +1}',
@@ -89,6 +87,7 @@ class Command(BaseCommand):
             ).save()
         
         for i in range (5):
+            self.stdout.write(self.style.NOTICE(f'Creating Module {i + 50}'))
             MyModels.Module.objects.create(
                 grade_id = 2,
                 module_name = f'Module {i + 50}',
@@ -96,6 +95,7 @@ class Command(BaseCommand):
             ).save()
 
         for i in range (5):
+            self.stdout.write(self.style.NOTICE(f'Creating Module {i +100}'))
             MyModels.Module.objects.create(
                 grade_id = 3,
                 module_name = f'Module {i + 100}',
@@ -132,6 +132,7 @@ class Command(BaseCommand):
             "4f0tOmtXk2M"
         ]
         for i in range (10):
+            self.stdout.write(self.style.NOTICE(f'Creating Lesson {i +1} as heading {i +1}'))
             MyModels.Lesson.objects.create(
                 grade_id = 1,
                 module_id = 1,
@@ -172,6 +173,7 @@ class Command(BaseCommand):
             ).save()
 
         for i in range (10):
+            self.stdout.write(self.style.NOTICE(f'Creating Lesson {i +12} as heading {i +12}'))
             MyModels.Lesson.objects.create(
                 grade_id = 1,
                 module_id = 2,
@@ -212,6 +214,7 @@ class Command(BaseCommand):
             ).save()
         
         for i in range (10):
+            self.stdout.write(self.style.NOTICE(f'Creating Lesson {i +32} as heading {i +32}'))
             MyModels.Lesson.objects.create(
                 grade_id = 1,
                 module_id = 3,
@@ -255,6 +258,7 @@ class Command(BaseCommand):
         self.stdout.write(self.style.NOTICE('Creating Questions...'))
 
         for i in range (25):
+            self.stdout.write(self.style.NOTICE(f'Creating Module Question {i +1} '))
             MyModels.ModuleQuestion.objects.create(
                 grade_id = 1,
                 module_id = 1,
@@ -268,6 +272,7 @@ class Command(BaseCommand):
             ).save()
 
         for i in range (25):
+            self.stdout.write(self.style.NOTICE(f'Creating Module Question {i +20} '))
             MyModels.ModuleQuestion.objects.create(
                 grade_id = 1,
                 module_id = 2,
@@ -281,6 +286,7 @@ class Command(BaseCommand):
             ).save()
 
         for i in range (25):
+            self.stdout.write(self.style.NOTICE(f'Creating Module Question {i +20} '))
             MyModels.ModuleQuestion.objects.create(
                 grade_id = 1,
                 module_id = 3,

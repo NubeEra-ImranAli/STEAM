@@ -11,7 +11,7 @@ import csv
 from django.http import JsonResponse
 from django.db.models import Sum, F, Value, Q, Count, F, Case, When, IntegerField
 from django.db.models.functions import Coalesce
-from datetime import datetime
+from datetime import datetime,timedelta
 import json
 ROMAN_NUMERAL_MAP = {
                         'V': 5,
@@ -102,6 +102,7 @@ def student_list(request):
     else:
         return render(request, 'loginrelated/diffrentuser.html')
     
+@login_required
 def student_attendance(request):
     if str(request.session['utype']) == 'teacher':
         query = request.GET.get('search', '')
@@ -146,7 +147,7 @@ def student_attendance(request):
 
                     except MyModels.StudentAttendance.DoesNotExist:
                         # If the record doesn't exist, create it
-                        attendance_record = MyModels.StudentAttendance(
+                        attendance_record = MyModels.StudentAttendance.objects.create(
                             student=student,
                             date=tdate,
                             status=is_present
@@ -170,6 +171,7 @@ def student_attendance(request):
 
     return render(request, 'loginrelated/diffrentuser.html')
     
+@login_required
 def student_list_pending(request):
     if str(request.session['utype']) == 'teacher':
         query = request.GET.get('search', '')
@@ -188,6 +190,7 @@ def student_list_pending(request):
     else:
         return render(request,'loginrelated/diffrentuser.html')
     
+@login_required
 def create_student(request):
     if str(request.session['utype']) == 'teacher':
 
@@ -228,6 +231,7 @@ def create_student(request):
     else:
         return render(request,'loginrelated/diffrentuser.html')
     
+@login_required
 def check_username_exist(request, username, fname, lname):
     # Check if the provided username exists
     if User.objects.filter(username=username).exists():
@@ -325,8 +329,8 @@ def teacher_view_user_list_view(request):
     #except:
         return render(request,'loginrelated/diffrentuser.html')
 
-
-def attendance_report_view(request):
+@login_required
+def attendance_reportdaywise_view(request):
     # Fetch all grades and divisions for the dropdown
     grades = MyModels.Grade.objects.all()
     divisions = MyModels.Division.objects.all()
@@ -391,7 +395,7 @@ def attendance_report_view(request):
             'attendance_percentage': round(attendance_percentage, 2),
         })
     # Pass data to the template
-    return render(request, 'teacher/user/student_attendance_report.html', {
+    return render(request, 'teacher/user/student_attendance_report_day.html', {
         'report': report,
         'search_date': search_date.strftime('%d-%m-%Y') if search_date else '',
         'search_grade': search_grade,
@@ -400,6 +404,100 @@ def attendance_report_view(request):
         'divisions': divisions,
     })
 
+@login_required
+def attendance_reportmonthwise_view(request):
+    # Fetch all grades and divisions for the dropdown
+    grades = MyModels.Grade.objects.all()
+    divisions = MyModels.Division.objects.all()
+
+    # Default to current date if no date is selected
+    today = datetime.today()
+
+    # Initialize variables to be passed to the template
+    student_attendance = {}
+    current_month_days = []
+    search_date = None
+    search_grade = None
+    search_division = None
+    search_grade_name = ''
+    search_division_name = ''
+
+    if request.method == 'POST':
+        # Get the search parameters from POST request
+        search_date = request.POST.get('date', None)
+        search_grade = request.POST.get('grade', None)
+        search_division = request.POST.get('division', None)
+
+        # Default to current month if no date is provided
+        if search_date:
+            try:
+                # Parsing the month input (format: 'YYYY-MM')
+                year, month = map(int, search_date.split('-'))
+
+                # Calculate the first day of the next month
+                if month == 12:
+                    first_day_of_next_month = datetime(year + 1, 1, 1)
+                else:
+                    first_day_of_next_month = datetime(year, month + 1, 1)
+
+                # Subtract 1 day to get the last day of the current month
+                last_day_of_month = first_day_of_next_month - timedelta(days=1)
+                first_day_of_month = datetime(year, month, 1).date()
+
+            except ValueError:
+                # Handle invalid date format
+                search_date = None
+                last_day_of_month = today
+                first_day_of_month = today
+        else:
+            first_day_of_month = today.replace(day=1)
+            if today.month == 12:
+                last_day_of_month = datetime(today.year + 1, 1, 1) - timedelta(days=1)
+            else:
+                last_day_of_month = datetime(today.year, today.month + 1, 1) - timedelta(days=1)
+
+        # Filter attendance data based on the date range (first_day_of_month to last_day_of_month)
+        attendance_data = MyModels.StudentAttendance.objects.filter(date__range=[first_day_of_month, last_day_of_month])
+        
+        # Filter by grade and division if provided
+        if search_grade:
+            attendance_data = attendance_data.filter(student__grade__id=search_grade)
+            search_grade_name = MyModels.Grade.objects.get(id=search_grade).grade_name
+
+        if search_division:
+            attendance_data = attendance_data.filter(student__division__id=search_division)
+            search_division_name = MyModels.Division.objects.get(id=search_division).division_name
+
+        # Get all students for the selected grade and division (if applicable)
+        students = MyModels.User.objects.all().filter(utype='student', school_id=request.user.school_id)
+        if search_grade:
+            students = students.filter(grade__id=search_grade)
+        if search_division:
+            students = students.filter(division__id=search_division)
+
+        # Create a dictionary to store attendance data for each student
+        student_attendance = {}
+        for student in students:
+            student_attendance[student] = {}
+            for day in range(1, last_day_of_month.day + 1):
+                day_date = datetime(first_day_of_month.year, first_day_of_month.month, day).date()
+                attendance = attendance_data.filter(student=student, date=day_date).first()
+                student_attendance[student][day_date] = 'Y' if attendance and attendance.status == 1 else 'N'
+
+        current_month_days = [datetime(first_day_of_month.year, first_day_of_month.month, day).date() for day in range(1, last_day_of_month.day + 1)]
+
+    # Pass data to the template
+    return render(request, 'teacher/user/student_attendance_report_month.html', {
+        'report': student_attendance,
+        'current_month_days': current_month_days,
+        'search_date': search_date,
+        'search_grade': search_grade,
+        'search_grade_name': search_grade_name,
+        'search_division': search_division,
+        'search_division_name': search_division_name,
+        'grades': grades,
+        'divisions': divisions,
+    })
 
 @login_required
 def attendance_details(request, grade_id, division_id, date):
@@ -784,5 +882,115 @@ def schedulerstatus_delete(request, id):
         schedulerstatus.delete()
         
         return redirect('schedulerstatus_list')
+    else:
+        return render(request,'loginrelated/diffrentuser.html')
+@login_required
+def fee_setting(request):
+    if str(request.session['utype']) == 'teacher':
+        if request.method == "POST":
+            # Handle form data for updating or inserting new fees
+            for grade_id in request.POST:
+                if grade_id != 'csrfmiddlewaretoken':  # Ignore CSRF token field
+                    grade = MyModels.Grade.objects.get(id=grade_id)
+                    grade_fee = request.POST[grade_id]  # Get the new fee for this grade
+                    
+                    # Check if a GradeFee record exists for this grade
+                    fee_record, created = MyModels.GradeFee.objects.update_or_create(
+                        school_id=request.user.school_id,
+                        grade=grade,
+                        defaults={'fee': grade_fee}
+                    )
+
+            return redirect('fee-setting')
+
+        # Fetch all grades and their corresponding fees (if any)
+        grades = list(MyModels.Grade.objects.all())
+        grade_fees = MyModels.GradeFee.objects.filter(school=request.user.school_id)
+
+        # Create a dictionary of grade IDs to fees
+        grade_fee_dict = {grade_fee.grade.id: grade_fee.fee for grade_fee in grade_fees}
+
+        # Sort grades using the custom roman_to_int function
+        grades_sorted = sorted(grades, key=lambda grade: roman_to_int(grade.grade_name))
+
+        return render(request, 'teacher/fee/fee_setting.html', {
+            'grades': grades_sorted,
+            'grade_fee_dict': grade_fee_dict
+        })
+    else:
+        return render(request, 'loginrelated/diffrentuser.html')
+
+# Display list of feepaids
+@login_required
+def feepaid_list(request):
+    if str(request.session['utype']) == 'teacher':
+        feepaids = MyModels.FeePaid.objects.all()
+        return render(request, 'teacher/fee/feepaid_list.html', {'feepaids': feepaids})
+    else:
+        return render(request,'loginrelated/diffrentuser.html')
+
+# Create a new feepaid
+@login_required
+def feepaid_create(request):
+    if str(request.session['utype']) == 'teacher':
+        if request.method == 'POST':
+            tdate_str = request.POST.get('date')
+            student = request.POST.get('student')
+            feepaid = request.POST['feepaid']
+            try:
+                date = datetime.strptime(tdate_str, '%d-%m-%Y').date()
+            except ValueError:
+                return JsonResponse({"error": "Invalid date format"}, status=400)
+            fee = MyModels.FeePaid.objects.create(date=date,student_id=student,feepaid=feepaid)
+            fee.save()
+            messages.success(request, 'FeePaid created successfully!')
+            return redirect('feepaid_create')
+        students = MyModels.User.objects.filter(school_id = request.user.school_id,utype='student')\
+                        .values('id','first_name','last_name').order_by('first_name','last_name')
+        return render(request, 'teacher/fee/feepaid_create.html',{'students':students})
+    else:
+        return render(request,'loginrelated/diffrentuser.html')
+
+# Update an existing feepaid
+@login_required
+    
+def feepaid_update(request, id):
+    if str(request.session['utype']) == 'teacher':
+        if request.method == 'POST':
+            grade = request.POST.get('grade')
+            feepaid_name = request.POST['feepaid_name']
+            description = request.POST['description']
+            
+            mode = get_object_or_404(MyModels.FeePaid, id=id)
+            mode.grade_id = grade
+            mode.feepaid_name = feepaid_name
+            mode.description = description
+            
+            mode.save()
+            messages.success(request, 'FeePaid updated successfully!' if id else 'FeePaid created successfully!')
+            return redirect('feepaid_list')
+
+        # Load the feepaid details if updating
+        feepaid = None
+        feepaid = get_object_or_404(MyModels.FeePaid, id=id)
+
+        grades = MyModels.Grade.objects.filter(id__isnull=False).values('id', 'grade_name')
+        grades = sorted(grades, key=lambda x: (ROMAN_NUMERAL_MAP.get(x['grade_name'], 0)))
+
+        return render(request, 'teacher/fee/feepaid_update.html', {
+            'grades': grades,
+            'feepaid': feepaid,
+        })
+    else:
+        return render(request, 'loginrelated/diffrentuser.html')
+
+# Delete a feepaid
+@login_required
+def feepaid_delete(request, id):
+    if str(request.session['utype']) == 'teacher':
+        feepaid = get_object_or_404(MyModels.FeePaid, id=id)
+        feepaid.delete()
+        
+        return redirect('feepaid_list')
     else:
         return render(request,'loginrelated/diffrentuser.html')

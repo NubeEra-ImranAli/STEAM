@@ -186,7 +186,7 @@ class ExamResultDetails(models.Model):
 
 class StudentAttendance(models.Model):
     student=models.ForeignKey(User,on_delete=models.SET_NULL, null=True)
-    date = models.DateField(auto_now=True)
+    date = models.DateField()
     status = models.PositiveIntegerField(default=0)
 
 class Scheduler(models.Model): 
@@ -204,7 +204,17 @@ class Scheduler(models.Model):
         return self.title
     
 class SchedulerStatus(models.Model): 
-    date = models.DateField(auto_now=True)
+    date = models.DateField()
     scheduler=models.ForeignKey(Scheduler,on_delete=models.SET_NULL, null=True)
     teacher=models.ForeignKey(User,on_delete=models.SET_NULL, null=True)
     status=models.PositiveIntegerField(default=0)
+
+class GradeFee(models.Model): 
+    school=models.ForeignKey(School,on_delete=models.SET_NULL, null=True)
+    grade=models.ForeignKey(Grade,on_delete=models.SET_NULL, null=True)
+    fee=models.PositiveIntegerField(default=0)
+
+class FeePaid(models.Model): 
+    date = models.DateField()
+    student=models.ForeignKey(User,on_delete=models.SET_NULL, null=True)
+    feepaid=models.PositiveIntegerField(default=0)

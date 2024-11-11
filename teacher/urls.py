@@ -6,7 +6,8 @@ urlpatterns = [
     path('create-student', views.create_student,name='create-student'),
     path('student-list', views.student_list,name='student-list'),
     path('student-attendance', views.student_attendance,name='student-attendance'),
-    path('attendance-report/', views.attendance_report_view, name='attendance-report'),
+    path('attendance-report-daywise/', views.attendance_reportdaywise_view, name='attendance-report-daywise'),
+    path('attendance-report-monthwise/', views.attendance_reportmonthwise_view, name='attendance-report-monthwise'),
     path('attendance/<int:grade_id>/<int:division_id>/<str:date>/', views.attendance_details, name='attendance_details'),
 
     path('student-list-pending', views.student_list_pending,name='student-list-pending'),
@@ -32,5 +33,12 @@ urlpatterns = [
     path('schedulerstatus/create/', views.schedulerstatus_create, name='schedulerstatus_create'),
     path('schedulerstatus/delete/<int:id>/', views.schedulerstatus_delete, name='schedulerstatus_delete'),
     path('get-scheduler-status-sum/', views.get_scheduler_status_sum, name='get_scheduler_status_sum'),
+   
+    path('fee-setting/', views.fee_setting, name='fee-setting'),
+    path('feepaid/', views.feepaid_list, name='feepaid_list'),
+    path('feepaid/create/', views.feepaid_create, name='feepaid_create'),
+    path('feepaid/update/<int:id>/', views.feepaid_update, name='feepaid_update'),
+    path('feepaid/delete/<int:id>/', views.feepaid_delete, name='feepaid_delete'),
+    
 
 ]

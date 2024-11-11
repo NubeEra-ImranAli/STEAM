@@ -25,7 +25,7 @@ class Command(BaseCommand):
         school_id = School.objects.values('id')[0]['id']
         username = 'principle'
         email = 'imran@example.com'
-        password = 'steam123'  # Change this to your desired password
+        password = 'principle'  # Change this to your desired password
 
 
 
@@ -42,7 +42,7 @@ class Command(BaseCommand):
         school_id = School.objects.values('id')[0]['id']
         username = 'staff'
         email = 'imran@example.com'
-        password = 'steam123'  # Change this to your desired password
+        password = 'staff'  # Change this to your desired password
 
 
 
@@ -58,7 +58,6 @@ class Command(BaseCommand):
         # Creating the teacher (non-superuser)
         username = 'teacher'
         email = 'imran@example.com'
-        password = 'steam123'  # Change this to your desired password
         for i in range (10):
             self.stdout.write(self.style.NOTICE(f'Creating teacher {i+1}'))
             username = f'teacher{i+1}'
@@ -66,5 +65,5 @@ class Command(BaseCommand):
                 self.stdout.write(self.style.WARNING(f'User "{username}" already exists.'))
             else:
                 # Using create_user instead of create_superuser
-                User.objects.create_user(username=username, email=email, password=password, status=True, utype='teacher',school_id=i+1)
+                User.objects.create_user(username=username, email=email, password=username, status=True, utype='teacher',school_id=i+1)
                 self.stdout.write(self.style.SUCCESS(f'Teacher "{username}" created successfully.'))

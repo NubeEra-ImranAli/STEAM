@@ -1,0 +1,116 @@
+{% extends 'teacher/teacherbase.html' %}
+{% block content %}
+{% load static %}
+<link rel="stylesheet" href="/static/get/css/style.css">
+<style>
+  ol.breadcrumb li+li:before {
+    content: '\f061';
+  display: inline-block;
+  font-family: 'fontAwesome';
+  padding: 0 10px;
+  }
+</style>
+    <!-- Include Flatpickr CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+
+<div>
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb">
+            <li>
+                <a href="{% url 'user-dashboard' %}">Dashboard</a>
+            </li>
+            <li>
+                <a href="{% url 'feepaid_list' %}">Paid Fee List</a>
+            </li>
+            <li aria-current="page">Creating Paid Fee</li>
+        </ol>
+    </nav>
+</div>
+{% if messages %}
+    {% for message in messages %}
+<div class="alert alert-info" id="success-message">{{ message }}</div>
+{% endfor %}
+{% endif %}
+<script>
+    // Wait for the DOM to load
+    document.addEventListener("DOMContentLoaded", function() {
+        // Select the success message
+        var message = document.getElementById("success-message");
+        if (message) {
+            // Set a timer to hide the message after 5 seconds (5000 ms)
+            setTimeout(function() {
+                message.style.display = 'none';
+            }, 5000);
+        }
+    });
+</script>
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <div class="row">
+        <div class="col-xl-12 col-lg-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4 class="card-title">Create Paid Fee</h4>
+                </div>
+                <div class="card-body">
+                    {% csrf_token %}
+                    <div class="basic-form">
+                        <div class="row">
+                            <div class="mb-6 col-md-6">
+                                <label class="col-form-label" for="date">Date</label>
+                                <!-- Date Picker -->
+                <input type="text" class="form-control" name="date" id="date" placeholder="Select Date"
+                value="{{ search_date }}">
+                            </div>
+                            
+                        </div>
+                        <div class="row">
+                            <div class="mb-6 col-md-6">
+                                <label class="form-label" for="student">Student</label>
+                                <select
+                                    class="form-control"
+                                    id="student"
+                                    name="student"
+                                    required
+                                >
+                                    <option value="">Select Student</option>
+
+                                    {% for t in students %}
+                                    <option value="{{ t.id }}">{{ t.first_name }} {{ t.last_name }} </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="mb-6 col-md-6">
+                                <label class="col-form-label" for="feepaid">Fee Paid</label>
+                                <input
+                                    type="number"
+                                    class="form-control"
+                                    name="feepaid"
+                                    id="feepaid"
+                                    required
+                                >
+                            </div>
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary">Create</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+<!-- Include Flatpickr JS -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+
+<script>
+    // Initialize Flatpickr for the date input with format dd-mm-yyyy
+    flatpickr("#date", {
+        dateFormat: "d-m-Y", // Format date as dd-mm-yyyy
+        allowInput: false, // Disable text input, only allow date selection
+        defaultDate: "today", // Default to today's date
+        locale: {
+            firstDayOfWeek: 1 // Start the calendar on Monday (optional)
+        }
+    });
+</script>
+{% endblock content %}

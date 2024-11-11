@@ -26,7 +26,11 @@
                     </li>
 
                     <li>
-                        <a href="{% url 'attendance-report' %}">Student Attendance Report</a>
+                        <a href="{% url 'attendance-report-daywise' %}">Student Attendance Day wise</a>
+                    </li>
+
+                    <li>
+                        <a href="{% url 'attendance-report-monthwise' %}">Student Attendance Month wise</a>
                     </li>
                     
                     <li>
@@ -75,6 +79,21 @@
                     <li>
                         <a href="{% url 'schedulerstatus_create' %}">Create Scheduler</a>
                     </li>                 
+                </ul>
+            </li>
+
+            <li>
+                <a class="has-arrow " href="javascript:void(0);" aria-expanded="false">
+                    <i class="bi bi-heart"></i>
+                    <span class="nav-text">Fee Management</span>
+                </a>
+                <ul aria-expanded="false">
+                    <li>
+                        <a href="{% url 'fee-setting' %}">Fee Setting</a>
+                    </li>
+                    <li>
+                        <a href="{% url 'feepaid_create' %}">Create Fee Paid</a>
+                    </li>
                 </ul>
             </li>
             <li>
