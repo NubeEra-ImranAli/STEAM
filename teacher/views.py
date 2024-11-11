@@ -900,6 +900,7 @@ def fee_setting(request):
                         grade=grade,
                         defaults={'fee': grade_fee}
                     )
+            messages.success(request, 'Fee Setting Saved successfully!')
 
             return redirect('fee-setting')
 
