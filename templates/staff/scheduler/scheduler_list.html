@@ -95,7 +95,7 @@
         {% for scheduler in schedulers %}
         <tr>
           <td>{{ scheduler.school.school_name }}</td>
-          <td>{{ scheduler.teacher.user_full_name }}</td>
+          <td>{{ scheduler.teacher.first_name }} {{ scheduler.teacher.last_name }}</td>
           <td>{{ scheduler.grade.grade_name }}</td>
           <td>{{ scheduler.division.division_name }}</td>
           <td>{{ scheduler.module.module_name }}</td>

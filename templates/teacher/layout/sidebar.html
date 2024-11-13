@@ -10,6 +10,13 @@
                     <span class="nav-text">Dashboard</span>
                 </a>
             </li>
+
+            <li>
+                <a href="{% url 'teacher-attendance-report-monthwise' %}" class="" aria-expanded="false">
+                    <i class="bi bi-grid"></i>
+                    <span class="nav-text">Self Attendance</span>
+                </a>
+            </li>
    
             <li>
                 <a class="has-arrow " href="javascript:void(0);" aria-expanded="false">
@@ -90,6 +97,12 @@
                 <ul aria-expanded="false">
                     <li>
                         <a href="{% url 'fee-setting' %}">Fee Setting</a>
+                    </li>
+                    <li>
+                        <a href="{% url 'feepaid_list' %}">Fee Paid List</a>
+                    </li>
+                    <li>
+                        <a href="{% url 'fee-report' %}">Student Fee Report</a>
                     </li>
                     <li>
                         <a href="{% url 'feepaid_create' %}">Create Fee Paid</a>

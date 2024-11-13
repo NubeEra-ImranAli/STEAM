@@ -14,8 +14,8 @@
   <nav aria-label="breadcrumb">
     <ol class="breadcrumb">
         <li><a href="{% url 'user-dashboard' %}">Dashboard</a></li>
-        <li><a href="{% url 'exam_create' %}">New Exam</a></li>
-      <li aria-current="page">View Exams</li>
+        <li><a href="{% url 'feepaid_create' %}">New Paid Fee</a></li>
+      <li aria-current="page">View Paid Fee</li>
     </ol>
   </nav>
 </div>
@@ -63,27 +63,28 @@
     <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
       <thead>
         <tr>
-          <th>Exam Name</th>
+          <th>Date</th>
+          <th>Student Name</th>
           <th>Grade</th>
-          <th>Results</th>
-          <th>Top 10</th>
+          <th>Division</th>
+          <th>Roll Number</th>
+          <th>Fee Paid</th>
           <th>Update</th>
           <th>Delete</th>
         </tr>
       </thead>
       <tbody>
-        {% for exam in exams %}
+        {% for fee in feepaids %}
         <tr>
-          <td> {{exam.exam_name}}</td>
-          <td> {{exam.grade}}</td>
-          
-          <td><a class="btn btn-info btn-xs" href="{% url 'exams-student-marks' exam.id %}"><span
-            class="	far fa-eye"></span></a></td>
-            <td><a class="btn btn-success btn-xs" href="{% url 'exams-student-top' exam.id %}"><span
-              class="	far fa-eye"></span></a></td>
-            <td><a class="btn btn-primary btn-xs" href="{% url 'exam_update' exam.id %}"><span
+          <td>{{ fee.date|date:"d-m-Y" }}</td>
+            <td> {{fee.student.first_name}} {{fee.student.last_name}}</td>
+          <td> {{fee.student.grade.grade_name}}</td>
+          <td> {{fee.student.division.division_name}}</td>
+          <td> {{fee.student.roll_no}}</td>
+          <td> {{fee.feepaid}}</td>
+          <td><a class="btn btn-primary btn-xs" href="{% url 'feepaid_update' fee.id %}"><span
               class="	far fa-edit"></span></a></td>
-          <td><a class="btn btn-danger btn-xs" href="{% url 'exam_delete' exam.id %}"
+          <td><a class="btn btn-danger btn-xs" href="{% url 'feepaid_delete' fee.id %}"
               onclick="return confirm('Are you sure?')"><span class="far fa-trash-alt"></span></a></td>
         </tr>
         {% endfor %}

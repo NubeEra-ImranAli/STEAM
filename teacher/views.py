@@ -12,7 +12,7 @@ from django.http import JsonResponse
 from django.db.models import Sum, F, Value, Q, Count, F, Case, When, IntegerField
 from django.db.models.functions import Coalesce
 from datetime import datetime,timedelta
-import json
+import calendar
 ROMAN_NUMERAL_MAP = {
                         'V': 5,
                         'VI': 6,
@@ -170,7 +170,71 @@ def student_attendance(request):
         })
 
     return render(request, 'loginrelated/diffrentuser.html')
-    
+
+@login_required
+def teacher_attendance_reportmonthwise_view(request):
+    today = datetime.today()
+    teacher_attendance = {}
+    current_month_days = []
+    search_date = None
+    teacher_id = request.user.id  # Set this to the specific teacher ID
+
+    # Fetch the teacher's name
+    teacher_name = request.user.get_full_name() or request.user.username
+
+    if request.method == 'POST':
+        # Get the selected month
+        search_date = request.POST.get('date', None)
+
+        # Default to the current month if no date is provided
+        if search_date:
+            try:
+                year, month = map(int, search_date.split('-'))
+                first_day_of_month = datetime(year, month, 1).date()
+                if month == 12:
+                    first_day_of_next_month = datetime(year + 1, 1, 1).date()
+                else:
+                    first_day_of_next_month = datetime(year, month + 1, 1).date()
+                last_day_of_month = first_day_of_next_month - timedelta(days=1)
+            except ValueError:
+                search_date = None
+                first_day_of_month = today.replace(day=1).date()
+                last_day_of_month = today.date()
+        else:
+            first_day_of_month = today.replace(day=1).date()
+            if today.month == 12:
+                last_day_of_month = (datetime(today.year + 1, 1, 1) - timedelta(days=1)).date()
+            else:
+                last_day_of_month = (datetime(today.year, today.month + 1, 1) - timedelta(days=1)).date()
+
+        # Generate a list of all days in the current month
+        current_month_days = [
+            first_day_of_month + timedelta(days=i)
+            for i in range((last_day_of_month - first_day_of_month).days + 1)
+        ]
+
+        # Get attendance data for the teacher for the selected month
+        attendance_data = MyModels.SchedulerStatus.objects.filter(
+            teacher_id=teacher_id,
+            date__range=[first_day_of_month, last_day_of_month]
+        )
+        
+        # Convert attendance data to a dictionary for faster lookup
+        attendance_dict = {record.date: record.status for record in attendance_data}
+
+        # Fill attendance status for each day of the month
+        for day in current_month_days:
+            # Check if there's a SchedulerStatus record for this day
+            status = attendance_dict.get(day, 0)  # Default to 0 if no entry found
+            teacher_attendance[day] = 'Y' if status > 0 else 'N'
+
+    return render(request, 'teacher/user/teacher_attendance_report_month.html', {
+        'report': teacher_attendance,
+        'current_month_days': current_month_days,
+        'search_date': search_date,
+        'teacher_name': teacher_name,
+    })
+
 @login_required
 def student_list_pending(request):
     if str(request.session['utype']) == 'teacher':
@@ -961,7 +1025,7 @@ def feepaid_update(request, id):
             grade = request.POST.get('grade')
             feepaid_name = request.POST['feepaid_name']
             description = request.POST['description']
-            
+
             mode = get_object_or_404(MyModels.FeePaid, id=id)
             mode.grade_id = grade
             mode.feepaid_name = feepaid_name
@@ -995,3 +1059,84 @@ def feepaid_delete(request, id):
         return redirect('feepaid_list')
     else:
         return render(request,'loginrelated/diffrentuser.html')
+    
+@login_required
+def fee_report(request):
+    if str(request.session['utype']) != 'teacher':
+        return render(request,'loginrelated/diffrentuser.html')
+    report_data = []
+    search_grade = ''
+    search_division = ''
+    grade_name = ''
+    division_name = ''
+    if request.method == 'POST':
+        # Get filter parameters from the request
+        search_grade = request.POST.get('grade')
+        search_division = request.POST.get('division')
+        grade_name = MyModels.Grade.objects.get(id=search_grade).grade_name
+        division_name = MyModels.Division.objects.get(id=search_grade).division_name
+        # Filter only students in the user's school and based on selected filters
+        students = User.objects.filter(utype="student", school=request.user.school)
+        if search_grade:
+            students = students.filter(grade_id=search_grade)
+        if search_division:
+            students = students.filter(division_id=search_division)
+
+        for student in students:
+            # Retrieve total fee for the student's grade
+            total_fee = MyModels.GradeFee.objects.filter(
+                school=student.school, grade=student.grade
+            ).aggregate(total_fee=Sum('fee'))['total_fee'] or 0
+            
+            # Retrieve total paid fee by the student
+            total_paid_fee = MyModels.FeePaid.objects.filter(student=student).aggregate(
+                total_paid_fee=Sum('feepaid')
+            )['total_paid_fee'] or 0
+
+            # Calculate balance fee
+            balance_fee = total_fee - total_paid_fee
+
+            report_data.append({
+                'student_id': student.id,
+                'student_name': student.first_name + ' ' + student.last_name,
+                'total_fee': total_fee,
+                'total_paid_fee': total_paid_fee,
+                'balance_fee': balance_fee,
+            })
+
+    # Get all grades and divisions for dropdowns
+    grades = MyModels.Grade.objects.filter(id__isnull=False).values('id', 'grade_name')
+    grades = sorted(grades, key=lambda x: (ROMAN_NUMERAL_MAP.get(x['grade_name'], 0)))
+    divisions = MyModels.Division.objects.all()
+    
+    return render(request, 'teacher/fee/student_fee_report.html', {
+        'report_data': report_data,
+        'grades': grades,
+        'divisions': divisions,
+        'search_grade': search_grade,
+        'grade_name': grade_name,
+        'search_division': search_division,
+        'division_name':division_name,
+    })
+
+@login_required
+def fee_report_details(request,student_id):
+    if str(request.session['utype']) != 'teacher':
+        return render(request,'loginrelated/diffrentuser.html')
+    student = User.objects.get(id=student_id, utype="student")
+    grade_name = student.grade.grade_name if student.grade else "N/A"
+    division_name = student.division.division_name if student.division else "N/A"
+    
+    # Get all fee payments for the student
+    fee_details = MyModels.FeePaid.objects.filter(student=student).order_by('date')
+    # Calculate the total amount of fee paid
+    total_paid = fee_details.aggregate(total=Sum('feepaid'))['total'] or 0
+    context = {
+        'student': student,
+        'grade_name': grade_name,
+        'division_name': division_name,
+        'fee_details': fee_details,
+        'total_paid': total_paid,
+    }
+    return render(request, 'teacher/fee/student_fee_report_details.html', context)
+

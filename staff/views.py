@@ -738,7 +738,7 @@ def scheduler_calender(request):
 @login_required
 def get_teachers(request, school_id):
     teachers = MyModels.User.objects.filter(school_id=school_id, utype='teacher')
-    return JsonResponse([{'id': teacher.id, 'name': teacher.user_full_name} for teacher in teachers], safe=False)
+    return JsonResponse([{'id': teacher.id, 'name': teacher.first_name + ' ' + teacher.last_name} for teacher in teachers], safe=False)
 
 # Get Divisions based on selected Grade
 @login_required

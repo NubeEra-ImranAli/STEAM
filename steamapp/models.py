@@ -201,7 +201,8 @@ class Scheduler(models.Model):
     all_day = models.BooleanField(default=False)
     
     def __str__(self):
-        return self.title
+        # Return a formatted string instead of a datetime object
+        return f"Schedule on {self.start.strftime('%Y-%m-%d %H:%M:%S')}"
     
 class SchedulerStatus(models.Model): 
     date = models.DateField()

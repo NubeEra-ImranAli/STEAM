@@ -16,9 +16,7 @@
                     <span class="nav-text">Teachers</span>
                 </a>
                 <ul aria-expanded="false">
-                    <li>
-                        <a href="{% url 'test-list' %}">test List</a>
-                    </li>
+
                     <li>
                         <a href="{% url 'teacher-list' %}">Teacher List</a>
                     </li>
@@ -27,6 +25,9 @@
                     </li>
                     <li>
                         <a href="{% url 'teacher-list-pending' %}">Pending Teacher List</a>
+                    </li>
+                    <li>
+                        <a href="{% url 'all-teacher-attendance-report-monthwise' %}">Teacher Attendance</a>
                     </li>
                 </ul>
             </li>

@@ -8,6 +8,7 @@ urlpatterns = [
     path('student-attendance', views.student_attendance,name='student-attendance'),
     path('attendance-report-daywise/', views.attendance_reportdaywise_view, name='attendance-report-daywise'),
     path('attendance-report-monthwise/', views.attendance_reportmonthwise_view, name='attendance-report-monthwise'),
+    path('teacher-attendance-report-monthwise/', views.teacher_attendance_reportmonthwise_view, name='teacher-attendance-report-monthwise'),
     path('attendance/<int:grade_id>/<int:division_id>/<str:date>/', views.attendance_details, name='attendance_details'),
 
     path('student-list-pending', views.student_list_pending,name='student-list-pending'),
@@ -39,6 +40,8 @@ urlpatterns = [
     path('feepaid/create/', views.feepaid_create, name='feepaid_create'),
     path('feepaid/update/<int:id>/', views.feepaid_update, name='feepaid_update'),
     path('feepaid/delete/<int:id>/', views.feepaid_delete, name='feepaid_delete'),
+    path('fee-report/', views.fee_report, name='fee-report'),
+    path('fee-report-details/<int:student_id>/', views.fee_report_details, name='fee-report-details'),
     
 
 ]

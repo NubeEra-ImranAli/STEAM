@@ -112,7 +112,7 @@ aria-hidden="true"
               Division: "{{ scheduler.division.division_name }}",
               Module: "{{ scheduler.module.module_name }}",
               Lesson: "{{ scheduler.lesson.heading }}",
-              Teacher: "{{ scheduler.teacher.user_full_name }}",
+              Teacher: "{{ scheduler.teacher.first_name }} {{ scheduler.teacher.last_name }}",
               StatusSum: "{{ scheduler.status_sum|default:0 }} %",
               DateComplete: "{{ scheduler.start|date:'Y-m-d\\TH:i:s' }}"
             }

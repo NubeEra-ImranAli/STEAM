@@ -41,7 +41,7 @@ def studykit(request):
         
         # Iterate through the lessons and set the first NO to YES after the last YES
         found_first_no = False  # Flag to track if we've found the first NO
-
+        js = json.dumps(lessons)
         for i, lesson in enumerate(lessons):
             if i == 0 and not lesson['watched_status']:  # First lesson in the list
                 lesson['watched_status_display'] = 'YES'
