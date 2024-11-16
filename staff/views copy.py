@@ -10,9 +10,7 @@ import json
 from django.http import JsonResponse
 from django.db.models import Exists, OuterRef,Case, When, Value, IntegerField,F, Value, Q, Sum, Max
 from django.db.models.functions import Coalesce
-from django.views.decorators.csrf import csrf_exempt
-from django.utils.decorators import method_decorator
-from steamapp.apicalls import make_api_request,update_data,handle_api_request,create_data
+
 ROMAN_NUMERAL_MAP = {
                         'V': 5,
                         'VI': 6,
@@ -90,49 +88,61 @@ def school_delete(request, id):
     else:
         return render(request,'loginrelated/diffrentuser.html')
 
-  
+import requests
+from django.http import JsonResponse
+def getapigrades():
+    api_url = "http://127.0.0.1:786/api/grades/"  # Replace with your API URL
+    headers = {
+        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzMxNjg0NDc1LCJpYXQiOjE3MzE2ODA4NzUsImp0aSI6IjM1NWViZWE0Y2I4ZjRiMDk5MDFkOWY1NDhkMmQ4ODI2IiwidXNlcl9pZCI6M30.NLCNr9DdqDWiXj_ovgZx-00wTEF7GC-c_Ykzm71hfWE",  # Replace with your actual token if authentication is required
+        "Content-Type": "application/json",
+    }
+
+    # Fetch data from the API
+    response = requests.get(api_url, headers=headers)
+    response.raise_for_status()  # Raise an error for bad status codes
+
+    # Parse the API response as JSON
+    api_data = response.json()
+
+    # Return the JSON response
+    return api_data
+
+    
 # Display list of grades
 @login_required
 def grade_list(request):
     if str(request.session['utype']) == 'staff':
-        # Fetch grades using the decrypted password
-        grades = handle_api_request(request, "grades", method="GET")
-        if "error" in grades:
-            return JsonResponse(grades, status=400)
+        grades = getapigrades()
         return render(request, 'staff/grade/grade_list.html', {'grades': grades})
     else:
-        return render(request, 'loginrelated/diffrentuser.html')
+        return render(request,'loginrelated/diffrentuser.html')
 
 # Create a new grade
 @login_required
 def grade_create(request):
     if str(request.session['utype']) == 'staff':
-        if request.method == "POST":
-            created_data = {
-                "grade_name": request.POST.get("grade_name"),
-            }
-            response = create_data(request, "grades", created_data)
-            if "error" in response:
-                return JsonResponse(response, status=400)  # Return error response
-            messages.success(request, 'Grade created successfully!')
-            return redirect('grade_create')
+        if request.method == 'POST':
+            grade_name = request.POST.get('grade_name')
+            if grade_name:
+                MyModels.Grade.objects.create(grade_name=grade_name)
+                messages.success(request, 'Grade created successfully!')
+                return redirect('grade_create')
         return render(request, 'staff/grade/grade_create.html')
     else:
         return render(request,'loginrelated/diffrentuser.html')
 
 # Update an existing grade
 @login_required
+    
 def grade_update(request, id):
     if str(request.session['utype']) == 'staff':
-        if request.method == "POST":
-            updated_data = {
-                "grade_name": request.POST.get("grade_name"),
-            }
-            response = update_data(request, "grades", id, updated_data)
-            if "error" in response:
-                return JsonResponse(response, status=400)  # Return error response
-            return redirect('grade_list')
-        grade = handle_api_request(request, "grades", method="GET", object_id=id)
+        grade = get_object_or_404(MyModels.Grade, id=id)
+        if request.method == 'POST':
+            grade_name = request.POST.get('grade_name')
+            if grade_name:
+                grade.grade_name = grade_name
+                grade.save()
+                return redirect('grade_list')
         return render(request, 'staff/grade/grade_update.html', {'grade': grade})
     else:
         return render(request,'loginrelated/diffrentuser.html')

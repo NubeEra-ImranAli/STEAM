@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.humanize',  # A set of Django template filters useful for adding a “human touch” to data.
     'django.contrib.sites',
     'ckeditor',
+    'corsheaders',
     
 ]
 
@@ -58,11 +59,14 @@ MIDDLEWARE = [
     'steamapp.userlinktraking.RequestMiddleware',
     'steamapp.userlinktraking.ErrorMiddleware',
     'steamapp.userlinktraking.UserActivityMiddleware',
+    'corsheaders.middleware.CorsMiddleware'
 ]
 CSRF_COOKIE_SECURE=False
 ROOT_URLCONF = 'STEAM.urls'
 CSRF_TRUSTED_ORIGINS = ['https://live.nubeera.com','https://*.nubeera.com']
-
+CORS_ALLOWED_ORIGINS = [
+    "http://127.0.0.1:786",  # Your frontend domain
+]
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',

@@ -28,6 +28,7 @@ from django.db import IntegrityError
 from django.core.files.storage import default_storage
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import csrf_exempt
+from .encryption_utils import encrypt_password
 
 ROMAN_NUMERAL_MAP = {
                         'V': 5,
@@ -129,6 +130,7 @@ def user_login(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             userlogin(request, user)
+            request.session['yono'] = encrypt_password(password)
             return redirect('home')  # Redirect to a success page.
         else:
             return render(request, 'loginrelated/userlogin.html', {'error_message': 'Invalid username or password.'})

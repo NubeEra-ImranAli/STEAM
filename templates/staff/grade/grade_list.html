@@ -70,13 +70,19 @@
       </thead>
       <tbody>
         {% for grade in grades %}
-        <tr>
-          <td> {{grade.grade_name}}</td>
-          <td><a class="btn btn-primary btn-xs" href="{% url 'grade_update' grade.id %}"><span
-                class="	far fa-edit"></span></a></td>
-          <td><a class="btn btn-danger btn-xs" href="{% url 'grade_delete' grade.id %}"
-              onclick="return confirm('Are you sure?')"><span class="far fa-trash-alt"></span></a></td>
-        </tr>
+          <tr>
+            <td>{{ grade.grade_name }}</td>
+            <td>
+              <a class="btn btn-primary btn-xs" href="{% url 'grade_update' grade.id %}">
+                <span class="far fa-edit"></span>
+              </a>
+            </td>
+            <td>
+              <a class="btn btn-danger btn-xs" href="{% url 'grade_delete' grade.id %}" onclick="return confirm('Are you sure?')">
+                <span class="far fa-trash-alt"></span>
+              </a>
+            </td>
+          </tr>
         {% endfor %}
       </tbody>
     </table>
