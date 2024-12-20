@@ -9,21 +9,21 @@ from datetime import datetime, timedelta
 from steamapp import models as MyModels
 
 def teacher_list(request):
-    if str(request.session['utype']) == 'principle':
+    if str(request.session['u']) == 'principle':
         users = User.objects.all().filter(utype = 'teacher', school_id = request.user.school.id, status = True)
         return render(request,'principle/user/teacher_list.html',{'users':users})
     else:
         return render(request,'loginrelated/diffrentuser.html')
     
 def teacher_list_pending(request):
-    if str(request.session['utype']) == 'principle':
+    if str(request.session['u']) == 'principle':
         users = User.objects.all().filter(utype = 'teacher', school_id = request.user.school.id, status = False)
         return render(request,'principle/user/teacher_list_pending.html',{'users':users})
     else:
         return render(request,'loginrelated/diffrentuser.html')
     
 def create_teacher(request):
-    if str(request.session['utype']) == 'principle':
+    if str(request.session['u']) == 'principle':
 
         if request.method == "POST":
             # Get form data
@@ -52,7 +52,7 @@ def create_teacher(request):
     
 @login_required
 def all_teacher_attendance_reportmonthwise_view(request):
-    if str(request.session['utype']) != 'principle':
+    if str(request.session['u']) != 'principle':
         return render(request,'loginrelated/diffrentuser.html')
     today = datetime.today()
     teacher_attendance = {}

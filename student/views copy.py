@@ -9,7 +9,7 @@ import json
 # Display list of modules
 @login_required
 def studykit(request):
-    if str(request.session['utype']) == 'student':
+    if str(request.session['u']) == 'student':
         # Create a subquery to check if the lesson has been watched
         watched_lessons_subquery = MyModels.LessonWatched.objects.filter(
             lesson=OuterRef('id'),

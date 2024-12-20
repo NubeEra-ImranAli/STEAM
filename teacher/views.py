@@ -38,7 +38,7 @@ def roman_to_int(roman):
     
 @login_required
 def student_list(request):
-    if str(request.session['utype']) == 'teacher':
+    if str(request.session['u']) == 'teacher':
         # Get the 'search' and 'grade_id' parameters from the GET request
         query = request.GET.get('search', '')
         grade_id = request.GET.get('grade_id')
@@ -104,7 +104,7 @@ def student_list(request):
     
 @login_required
 def student_attendance(request):
-    if str(request.session['utype']) == 'teacher':
+    if str(request.session['u']) == 'teacher':
         query = request.GET.get('search', '')
         grade_id = request.GET.get('grade_id', '')
         division_id = request.GET.get('division_id', '')
@@ -237,7 +237,7 @@ def teacher_attendance_reportmonthwise_view(request):
 
 @login_required
 def student_list_pending(request):
-    if str(request.session['utype']) == 'teacher':
+    if str(request.session['u']) == 'teacher':
         query = request.GET.get('search', '')
         users = User.objects.all().filter(utype = 'student', school_id = request.user.school.id, status = False)
         if query:
@@ -256,7 +256,7 @@ def student_list_pending(request):
     
 @login_required
 def create_student(request):
-    if str(request.session['utype']) == 'teacher':
+    if str(request.session['u']) == 'teacher':
 
         if request.method == "POST":
             # Get form data
@@ -315,7 +315,7 @@ def check_username_exist(request, username, fname, lname):
 
 @login_required
 def upload_student_csv(request):
-    if str(request.session['utype']) == 'teacher':
+    if str(request.session['u']) == 'teacher':
         if request.method == 'POST':
             if 'select_file' not in request.FILES or request.FILES['select_file'] == '':
                 messages.info(request, 'Please select a CSV file for upload')
@@ -374,7 +374,7 @@ def upload_student_csv(request):
 @login_required
 def teacher_view_user_list_view(request):
     #try:    
-        if str(request.session['utype']) == 'teacher':
+        if str(request.session['u']) == 'teacher':
             query = request.GET.get('search', '')
             users = User.objects.all().filter(is_superuser = False, utype = 'student')
 
@@ -565,7 +565,7 @@ def attendance_reportmonthwise_view(request):
 
 @login_required
 def attendance_details(request, grade_id, division_id, date):
-    if str(request.session['utype']) == 'teacher':
+    if str(request.session['u']) == 'teacher':
         # Convert the date string to a date object
         try:
             attendance_date = datetime.strptime(date, '%d-%m-%Y').date()
@@ -620,7 +620,7 @@ def attendance_details(request, grade_id, division_id, date):
 # Display list of exams
 @login_required
 def exam_list(request):
-    if str(request.session['utype']) == 'teacher':
+    if str(request.session['u']) == 'teacher':
         exams = MyModels.Exam.objects.all()
         return render(request, 'teacher/exam/exam_list.html', {'exams': exams})
     else:
@@ -629,7 +629,7 @@ def exam_list(request):
 # Display list of exams
 @login_required
 def exam_student_top(request,exam_id):
-    if str(request.session['utype']) == 'teacher':
+    if str(request.session['u']) == 'teacher':
         # Get the top 10 students ordered by their marks in the most recent exam result
         students = MyModels.ExamResult.objects.filter(exam_id=exam_id,student__status=True).order_by('-marks')[:10].values(
             'student__user_full_name',  # Student's full name
@@ -643,7 +643,7 @@ def exam_student_top(request,exam_id):
 
 @login_required
 def exam_student_marks_list(request,exam_id):
-    if str(request.session['utype']) == 'teacher':
+    if str(request.session['u']) == 'teacher':
         # Query to get all students with their exam marks, or 0 if no result exists
         students = User.objects.filter(utype='student',status=True).annotate(
     marks=Coalesce(
@@ -662,7 +662,7 @@ def exam_student_marks_list(request,exam_id):
 @login_required
 def exam_student_details_list(request,exam_id,student_id):
     #try:    
-        if str(request.session['utype']) == 'teacher':
+        if str(request.session['u']) == 'teacher':
             # Pre-fetch related ExamResult for each ExamResultDetail
             exams = MyModels.ExamResultDetails.objects.all().filter(
                 examresult__student__status=True,
@@ -676,7 +676,7 @@ def exam_student_details_list(request,exam_id,student_id):
 # Create a new exam
 @login_required
 def exam_create(request):
-    if str(request.session['utype']) == 'teacher':
+    if str(request.session['u']) == 'teacher':
         if request.method == 'POST':
             grade = request.POST.get('grade')
             exam_name = request.POST['exam_name']
@@ -700,7 +700,7 @@ def exam_create(request):
 @login_required
     
 def exam_update(request, id):
-    if str(request.session['utype']) == 'teacher':
+    if str(request.session['u']) == 'teacher':
         if request.method == 'POST':
             grade = request.POST.get('grade')
             exam_name = request.POST['exam_name']
@@ -732,7 +732,7 @@ def exam_update(request, id):
 # Delete a exam
 @login_required
 def exam_delete(request, id):
-    if str(request.session['utype']) == 'teacher':
+    if str(request.session['u']) == 'teacher':
         exam = get_object_or_404(MyModels.Exam, id=id)
         exam.delete()
         
@@ -749,7 +749,7 @@ def get_exams(request):
 # Display list of examquestion
 @login_required
 def examquestion_list(request):
-    if str(request.session['utype']) == 'teacher':
+    if str(request.session['u']) == 'teacher':
         examquestion = MyModels.ExamQuestion.objects.all().order_by('grade', 'exam')
         return render(request, 'teacher/examquestion/examquestion_list.html', {'examquestion': examquestion})
     else:
@@ -758,7 +758,7 @@ def examquestion_list(request):
 # Create a new examquestion
 @login_required
 def examquestion_create(request):
-    if str(request.session['utype']) == 'teacher':
+    if str(request.session['u']) == 'teacher':
         if request.method == 'POST':
             grade = request.POST.get('grade')
             exam = request.POST.get('exam')
@@ -796,7 +796,7 @@ def examquestion_create(request):
 @login_required
     
 def examquestion_update(request, id):
-    if str(request.session['utype']) == 'teacher':
+    if str(request.session['u']) == 'teacher':
         if request.method == 'POST':
             grade = request.POST.get('grade')
             exam = request.POST.get('exam')
@@ -849,7 +849,7 @@ def examquestion_update(request, id):
 # Delete a examquestion
 @login_required
 def examquestion_delete(request, id):
-    if str(request.session['utype']) == 'teacher':
+    if str(request.session['u']) == 'teacher':
         examquestion = get_object_or_404(MyModels.ExamQuestion, id=id)
         # Now delete the examquestion instance
         examquestion.delete()
@@ -872,7 +872,7 @@ def teacher_calender(request):
 # Display list of schedulerstatus
 @login_required
 def schedulerstatus_list(request):
-    if str(request.session['utype']) == 'teacher':
+    if str(request.session['u']) == 'teacher':
         schedulerstatus = MyModels.SchedulerStatus.objects.all()
         return render(request, 'teacher/schedulerstatus/schedulerstatus_list.html', {'schedulerstatus': schedulerstatus})
     else:
@@ -881,7 +881,7 @@ def schedulerstatus_list(request):
 # Create a new schedulerstatus
 @login_required
 def schedulerstatus_create(request):
-    if str(request.session['utype']) == 'teacher':
+    if str(request.session['u']) == 'teacher':
         if request.method == 'POST':
             scheduler = request.POST.get('scheduler')
             status = request.POST.get('status')
@@ -940,7 +940,7 @@ def get_scheduler_status_sum(request):
 # Delete a schedulerstatus
 @login_required
 def schedulerstatus_delete(request, id):
-    if str(request.session['utype']) == 'teacher':
+    if str(request.session['u']) == 'teacher':
         schedulerstatus = get_object_or_404(MyModels.SchedulerStatus, id=id)
         # Now delete the schedulerstatus instance
         schedulerstatus.delete()
@@ -950,7 +950,7 @@ def schedulerstatus_delete(request, id):
         return render(request,'loginrelated/diffrentuser.html')
 @login_required
 def fee_setting(request):
-    if str(request.session['utype']) == 'teacher':
+    if str(request.session['u']) == 'teacher':
         if request.method == "POST":
             # Handle form data for updating or inserting new fees
             for grade_id in request.POST:
@@ -988,7 +988,7 @@ def fee_setting(request):
 # Display list of feepaids
 @login_required
 def feepaid_list(request):
-    if str(request.session['utype']) == 'teacher':
+    if str(request.session['u']) == 'teacher':
         feepaids = MyModels.FeePaid.objects.all()
         return render(request, 'teacher/fee/feepaid_list.html', {'feepaids': feepaids})
     else:
@@ -997,7 +997,7 @@ def feepaid_list(request):
 # Create a new feepaid
 @login_required
 def feepaid_create(request):
-    if str(request.session['utype']) == 'teacher':
+    if str(request.session['u']) == 'teacher':
         if request.method == 'POST':
             tdate_str = request.POST.get('date')
             student = request.POST.get('student')
@@ -1020,7 +1020,7 @@ def feepaid_create(request):
 @login_required
     
 def feepaid_update(request, id):
-    if str(request.session['utype']) == 'teacher':
+    if str(request.session['u']) == 'teacher':
         if request.method == 'POST':
             grade = request.POST.get('grade')
             feepaid_name = request.POST['feepaid_name']
@@ -1052,7 +1052,7 @@ def feepaid_update(request, id):
 # Delete a feepaid
 @login_required
 def feepaid_delete(request, id):
-    if str(request.session['utype']) == 'teacher':
+    if str(request.session['u']) == 'teacher':
         feepaid = get_object_or_404(MyModels.FeePaid, id=id)
         feepaid.delete()
         
@@ -1062,7 +1062,7 @@ def feepaid_delete(request, id):
     
 @login_required
 def fee_report(request):
-    if str(request.session['utype']) != 'teacher':
+    if str(request.session['u']) != 'teacher':
         return render(request,'loginrelated/diffrentuser.html')
     report_data = []
     search_grade = ''
@@ -1121,7 +1121,7 @@ def fee_report(request):
 
 @login_required
 def fee_report_details(request,student_id):
-    if str(request.session['utype']) != 'teacher':
+    if str(request.session['u']) != 'teacher':
         return render(request,'loginrelated/diffrentuser.html')
     student = User.objects.get(id=student_id, utype="student")
     grade_name = student.grade.grade_name if student.grade else "N/A"

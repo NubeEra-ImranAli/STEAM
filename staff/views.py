@@ -26,7 +26,7 @@ ROMAN_NUMERAL_MAP = {
 # Display list of schools
 @login_required
 def school_list(request):
-    if str(request.session['utype']) == 'staff':
+    if str(request.session['u']) == 'staff':
         schools = MyModels.School.objects.all()
         return render(request, 'staff/school/school_list.html', {'schools': schools})
     else:
@@ -35,7 +35,7 @@ def school_list(request):
 # Create a new school
 @login_required
 def school_create(request):
-    if str(request.session['utype']) == 'staff':
+    if str(request.session['u']) == 'staff':
         if request.method == 'POST':
             school_name = request.POST.get('school_name')
             contact_person = request.POST.get('contact_person')
@@ -60,7 +60,7 @@ def school_create(request):
 # Update an existing school
 @login_required
 def school_update(request, id):
-    if str(request.session['utype']) == 'staff':
+    if str(request.session['u']) == 'staff':
         school = get_object_or_404(MyModels.School, id=id)
         if request.method == 'POST':
             school_name = request.POST.get('school_name')
@@ -83,7 +83,7 @@ def school_update(request, id):
 # Delete a school
 @login_required
 def school_delete(request, id):
-    if str(request.session['utype']) == 'staff':
+    if str(request.session['u']) == 'staff':
         school = get_object_or_404(MyModels.School, id=id)
         school.delete()
         return redirect('school_list')
@@ -94,7 +94,7 @@ def school_delete(request, id):
 # Display list of grades
 @login_required
 def grade_list(request):
-    if str(request.session['utype']) == 'staff':
+    if str(request.session['u']) == 'staff':
         # Fetch grades using the decrypted password
         grades = handle_api_request(request, "grades", method="GET")
         if "error" in grades:
@@ -106,7 +106,7 @@ def grade_list(request):
 # Create a new grade
 @login_required
 def grade_create(request):
-    if str(request.session['utype']) == 'staff':
+    if str(request.session['u']) == 'staff':
         if request.method == "POST":
             created_data = {
                 "grade_name": request.POST.get("grade_name"),
@@ -123,7 +123,7 @@ def grade_create(request):
 # Update an existing grade
 @login_required
 def grade_update(request, id):
-    if str(request.session['utype']) == 'staff':
+    if str(request.session['u']) == 'staff':
         if request.method == "POST":
             updated_data = {
                 "grade_name": request.POST.get("grade_name"),
@@ -140,7 +140,7 @@ def grade_update(request, id):
 # Delete a grade
 @login_required
 def grade_delete(request, id):
-    if str(request.session['utype']) == 'staff':
+    if str(request.session['u']) == 'staff':
         grade = get_object_or_404(MyModels.Grade, id=id)
         grade.delete()
         return redirect('grade_list')
@@ -150,7 +150,7 @@ def grade_delete(request, id):
 # Display list of divisions
 @login_required
 def division_list(request):
-    if str(request.session['utype']) == 'staff':
+    if str(request.session['u']) == 'staff':
         divisions = MyModels.Division.objects.all()
         return render(request, 'staff/division/division_list.html', {'divisions': divisions})
     else:
@@ -159,7 +159,7 @@ def division_list(request):
 # Create a new division
 @login_required
 def division_create(request):
-    if str(request.session['utype']) == 'staff':
+    if str(request.session['u']) == 'staff':
         if request.method == 'POST':
             division_name = request.POST.get('division_name')
             if division_name:
@@ -174,7 +174,7 @@ def division_create(request):
 @login_required
     
 def division_update(request, id):
-    if str(request.session['utype']) == 'staff':
+    if str(request.session['u']) == 'staff':
         division = get_object_or_404(MyModels.Division, id=id)
         if request.method == 'POST':
             division_name = request.POST.get('division_name')
@@ -189,7 +189,7 @@ def division_update(request, id):
 # Delete a division
 @login_required
 def division_delete(request, id):
-    if str(request.session['utype']) == 'staff':
+    if str(request.session['u']) == 'staff':
         division = get_object_or_404(MyModels.Division, id=id)
         division.delete()
         return redirect('division_list')
@@ -199,7 +199,7 @@ def division_delete(request, id):
 # Display list of modules
 @login_required
 def module_list(request):
-    if str(request.session['utype']) == 'staff':
+    if str(request.session['u']) == 'staff':
         modules = MyModels.Module.objects.all()
         return render(request, 'staff/module/module_list.html', {'modules': modules})
     else:
@@ -208,7 +208,7 @@ def module_list(request):
 # Create a new module
 @login_required
 def module_create(request):
-    if str(request.session['utype']) == 'staff':
+    if str(request.session['u']) == 'staff':
         if request.method == 'POST':
             grade = request.POST.get('grade')
             module_name = request.POST['module_name']
@@ -248,7 +248,7 @@ def module_create(request):
 @login_required
     
 def module_update(request, id):
-    if str(request.session['utype']) == 'staff':
+    if str(request.session['u']) == 'staff':
         if request.method == 'POST':
             grade = request.POST.get('grade')
             module_name = request.POST['module_name']
@@ -296,7 +296,7 @@ def module_update(request, id):
 # Delete a module
 @login_required
 def module_delete(request, id):
-    if str(request.session['utype']) == 'staff':
+    if str(request.session['u']) == 'staff':
         module = get_object_or_404(MyModels.Module, id=id)
         
         # Check if there is a module_pic and delete the file if it exists
@@ -323,7 +323,7 @@ def get_modules(request):
 # Display list of lessons
 @login_required
 def lesson_list(request):
-    if str(request.session['utype']) == 'staff':
+    if str(request.session['u']) == 'staff':
         lessons = MyModels.Lesson.objects.all().order_by('grade', 'module', 'serialno')
         return render(request, 'staff/lesson/lesson_list.html', {'lessons': lessons})
     else:
@@ -376,7 +376,7 @@ def update_lesson_order(request):
 
 @login_required
 def lesson_preview(request, id):
-    if str(request.session['utype']) == 'staff':
+    if str(request.session['u']) == 'staff':
         les = get_object_or_404(MyModels.Lesson, id=id)
         grade = les.grade_id
         module = les.module_id
@@ -406,7 +406,7 @@ def lesson_preview(request, id):
 # Create a new lesson
 @login_required
 def lesson_create(request):
-    if str(request.session['utype']) == 'staff':
+    if str(request.session['u']) == 'staff':
         if request.method == 'POST':
             grade = request.POST.get('grade')
             module = request.POST.get('module')
@@ -451,7 +451,7 @@ def lesson_create(request):
 @login_required
     
 def lesson_update(request, id):
-    if str(request.session['utype']) == 'staff':
+    if str(request.session['u']) == 'staff':
         if request.method == 'POST':
             grade = request.POST.get('grade')
             module = request.POST.get('module')
@@ -520,7 +520,7 @@ def lesson_update(request, id):
 # Delete a lesson
 @login_required
 def lesson_delete(request, id):
-    if str(request.session['utype']) == 'staff':
+    if str(request.session['u']) == 'staff':
         lesson = get_object_or_404(MyModels.Lesson, id=id)
         # Now delete the lesson instance
         lesson.delete()
@@ -533,7 +533,7 @@ def lesson_delete(request, id):
 # Display list of modulequestion
 @login_required
 def modulequestion_list(request):
-    if str(request.session['utype']) == 'staff':
+    if str(request.session['u']) == 'staff':
         modulequestion = MyModels.ModuleQuestion.objects.all().order_by('grade', 'module')
         return render(request, 'staff/modulequestion/modulequestion_list.html', {'modulequestion': modulequestion})
     else:
@@ -542,7 +542,7 @@ def modulequestion_list(request):
 # Create a new modulequestion
 @login_required
 def modulequestion_create(request):
-    if str(request.session['utype']) == 'staff':
+    if str(request.session['u']) == 'staff':
         if request.method == 'POST':
             grade = request.POST.get('grade')
             module = request.POST.get('module')
@@ -580,7 +580,7 @@ def modulequestion_create(request):
 @login_required
     
 def modulequestion_update(request, id):
-    if str(request.session['utype']) == 'staff':
+    if str(request.session['u']) == 'staff':
         if request.method == 'POST':
             grade = request.POST.get('grade')
             module = request.POST.get('module')
@@ -633,7 +633,7 @@ def modulequestion_update(request, id):
 # Delete a modulequestion
 @login_required
 def modulequestion_delete(request, id):
-    if str(request.session['utype']) == 'staff':
+    if str(request.session['u']) == 'staff':
         modulequestion = get_object_or_404(MyModels.ModuleQuestion, id=id)
         # Now delete the modulequestion instance
         modulequestion.delete()

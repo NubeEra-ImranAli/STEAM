@@ -6,11 +6,14 @@ from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Exists, OuterRef,Case, When, Value, IntegerField,F, Value, Q, Sum
 from django.db.models.functions import Coalesce
 import json
-
+from itertools import groupby
+from operator import itemgetter
+from django.db.models import Count, F, Case, When, IntegerField
+from django.db.models.functions import Coalesce
 # Display list of modules
 @login_required
 def studykit(request):
-    if str(request.session['utype']) == 'student':
+    if str(request.session['u']) == 'student':
         # Create a subquery to check if the lesson has been watched
         watched_lessons_subquery = MyModels.LessonWatched.objects.filter(
             lesson=OuterRef('id'),
@@ -75,10 +78,7 @@ def studykit(request):
         if total_lessons > 0:  # Avoid division by zero
             watched_percentage = (watched_lessons / total_lessons) * 100
         
-        from itertools import groupby
-        from operator import itemgetter
-        from django.db.models import Count, F, Case, When, IntegerField
-        from django.db.models.functions import Coalesce
+        
         grouped_lessons = {key: list(group) for key, group in groupby(lessons, key=itemgetter('module__module_name'))}
         
         return render(request, 'student/studykit/studykit.html', 
@@ -257,7 +257,7 @@ def submit_quiz_results(request):
 
 @login_required
 def module_exams(request):
-    if str(request.session['utype']) == 'student':
+    if str(request.session['u']) == 'student':
         modules = MyModels.ModuleResult.objects.filter(student_id=request.user.id,grade_id = request.user.grade_id ).values(
         'module__module_name','module__id'
     ).distinct()
@@ -269,7 +269,7 @@ def module_exams(request):
 
 @login_required
 def show_module_exams_attemps(request,module_id):
-    if str(request.session['utype']) == 'student':
+    if str(request.session['u']) == 'student':
         modules = MyModels.ModuleResult.objects.filter(module_id= module_id, student_id=request.user.id,grade_id = request.user.grade_id ).values(
         'module__module_name','module__id','marks','wrong','correct','date','id'
     )
@@ -281,7 +281,7 @@ def show_module_exams_attemps(request,module_id):
     
 @login_required
 def show_module_result(request,result_id):
-    if str(request.session['utype']) == 'student':
+    if str(request.session['u']) == 'student':
         results = (
         MyModels.ModuleResultDetails.objects
         .filter(moduleresult_id=result_id)
@@ -314,7 +314,7 @@ def show_module_result(request,result_id):
 
 @login_required
 def exams_list(request):
-    if str(request.session['utype']) == 'student':
+    if str(request.session['u']) == 'student':
         # Get all the exams for student_id=14 and grade_id=1, annotate marks with 0 if not available
         exam_results = MyModels.Exam.objects.annotate(
         marks=Coalesce(
@@ -340,7 +340,7 @@ def exams_list(request):
 @login_required
 def exam_show_reuslt_details(request,exam_id):
     try:    
-        if str(request.session['utype']) == 'student':
+        if str(request.session['u']) == 'student':
             exams=MyModels.ExamResultDetails.objects.all().filter(examresult__exam_id = exam_id,question_id__in = MyModels.ExamQuestion.objects.all())
             return render(request,'student/exam/exam_result_details.html',{'exams':exams})
     except:
@@ -348,7 +348,7 @@ def exam_show_reuslt_details(request,exam_id):
     
 @login_required
 def exams_rules(request,exam_id):
-    if str(request.session['utype']) == 'student':
+    if str(request.session['u']) == 'student':
         exam = MyModels.Exam.objects.get(id=exam_id)
         # Get all questions related to the exam
         questions = MyModels.ExamQuestion.objects.filter(exam=exam)
@@ -370,7 +370,7 @@ def exams_rules(request,exam_id):
 @login_required
 def exam_running(request,exam_id):
     try:    
-        if str(request.session['utype']) == 'student':
+        if str(request.session['u']) == 'student':
             if request.method == 'POST':
                 examresult = MyModels.ExamResult.objects.create(student_id = request.user.id,grade_id = request.user.grade_id,exam_id =exam_id,marks=0,wrong=0,correct=0)
                 examresult.save()

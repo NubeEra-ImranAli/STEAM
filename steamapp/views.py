@@ -209,17 +209,18 @@ def afterlogin_view(request):
     if user:
         for xx in user:
             if xx.is_superuser:
-                request.session['utype'] = 'admin'
+                request.session['u'] = 'admin'
                 return redirect('user-dashboard')
-            if not xx.status:
-                request.session['utype'] = xx.utype
+            elif not xx.status:
+                request.session['u'] = xx.utype
                 return render(request,'loginrelated/wait_for_approval.html')
-            if not xx.profile_updated:
-                request.session['utype'] = xx.utype
-                return redirect('user-profile')
-            if xx.status:
-                request.session['utype'] = xx.utype
+            elif xx.status:
+                request.session['u'] = xx.utype
                 return redirect('user-dashboard')
+            elif not xx.profile_updated:
+                request.session['u'] = xx.utype
+                return redirect('user-profile')
+            
             else:
                 return render(request,'loginrelated/wait_for_approval.html')
     else:
@@ -227,7 +228,7 @@ def afterlogin_view(request):
 
 @login_required
 def user_dashboard_view(request):
-    if str(request.session['utype']) == 'admin':
+    if str(request.session['u']) == 'admin':
         school_student = User.objects.filter(utype='student', grade__isnull=False)\
                         .values('school__school_name', 'grade__grade_name')\
                         .annotate(
@@ -297,7 +298,7 @@ def user_dashboard_view(request):
         }
         return render(request,'steamapp/admin_dashboard.html',context=dict)
     
-    elif str(request.session['utype']) == 'principle':
+    elif str(request.session['u']) == 'principle':
         dict={
         'total_schools':0,
         'total_exam':0,
@@ -307,7 +308,7 @@ def user_dashboard_view(request):
         'total_learner':0,
         }
         return render(request,'principle/principle_dashboard.html',context=dict)
-    elif str(request.session['utype']) == 'student':
+    elif str(request.session['u']) == 'student':
             total_lessons = MyModels.Lesson.objects.filter(
                         module__grade__user__id=request.user.id,
                         module__grade__user__grade_id=request.user.grade.id,
@@ -331,7 +332,7 @@ def user_dashboard_view(request):
             'watched_percentage':watched_percentage
             }
             return render(request,'student/student_dashboard.html',context=dict)
-    elif str(request.session['utype']) == 'teacher':
+    elif str(request.session['u']) == 'teacher':
         now = timezone.now()
         start_of_month = now.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
         end_of_month = (start_of_month + timedelta(days=32)).replace(day=1) - timedelta(days=1)
@@ -351,7 +352,7 @@ def user_dashboard_view(request):
             'schedulers': schedulers
         }
         return render(request,'teacher/teacher_dashboard.html',context=dict)
-    elif str(request.session['utype']) == 'staff':
+    elif str(request.session['u']) == 'staff':
         dict={
         'total_course':0,
         'total_exam':0,
@@ -443,7 +444,7 @@ def user_password(request):
 @login_required
 def admin_view_user_list_view(request):
     #try:    
-        if str(request.session['utype']) == 'admin':
+        if str(request.session['u']) == 'admin':
             query = request.GET.get('search', '')
             users = User.objects.all().filter(is_superuser = False)
 
@@ -465,7 +466,7 @@ def admin_view_user_list_view(request):
 
 def admin_view_user_log_details_view(request,user_id):
     try:    
-        if str(request.session['utype']) == 'admin':
+        if str(request.session['u']) == 'admin':
             users = models.UserLog.objects.all().filter(user_id = user_id)
             return render(request,'steamapp/users/admin_view_user_log_details.html',{'users':users})
     except:
@@ -474,7 +475,7 @@ def admin_view_user_log_details_view(request,user_id):
 @login_required
 def admin_view_user_activity_details_view(request,user_id):
     #try:    
-        if str(request.session['utype']) == 'admin':
+        if str(request.session['u']) == 'admin':
             users = models.UserActivity.objects.all().filter(user_id = user_id)
             return render(request,'steamapp/users/admin_view_user_activity_details.html',{'users':users})
     #except:
@@ -482,7 +483,7 @@ def admin_view_user_activity_details_view(request,user_id):
 
 @login_required
 def update_user_view(request, pk):
-    if str(request.session['utype']) == 'admin':
+    if str(request.session['u']) == 'admin':
         if request.method == 'POST':
             first_name = request.POST['first_name'].strip()
             last_name = request.POST['last_name'].strip()
@@ -534,7 +535,7 @@ def update_user_view(request, pk):
     return render(request,'loginrelated/diffrentuser.html')
 @login_required
 def active_user_view(request, pk):
-    if str(request.session['utype']) == 'admin':
+    if str(request.session['u']) == 'admin':
         try:
             user = User.objects.get(id=pk)
             user.status = not user.status  # Toggle status
@@ -546,7 +547,7 @@ def active_user_view(request, pk):
 
 @login_required
 def admin_view_user_list_school_view(request):
-    if str(request.session['utype']) == 'admin':
+    if str(request.session['u']) == 'admin':
         query = request.GET.get('search', '')
         school_id = request.GET.get('school')
         selected_school_id = int(school_id) if school_id else None
@@ -596,7 +597,7 @@ def admin_view_user_list_school_view(request):
 
 @login_required
 def reset_user_view(request, pk):
-    if str(request.session['utype']) == 'admin':
+    if str(request.session['u']) == 'admin':
         try:
             user = User.objects.get(id=pk)
             user.set_password('steamapp@123')
@@ -608,7 +609,7 @@ def reset_user_view(request, pk):
     return JsonResponse({'success': False, 'error': 'Unauthorized'})
 @login_required
 def delete_user_view(request,pk):
-    if str(request.session['utype']) == 'admin':
+    if str(request.session['u']) == 'admin':
         users = models.User.objects.get(id = pk)
         users.delete()
         users = User.objects.all().filter(is_superuser = False)
@@ -618,7 +619,7 @@ def delete_user_view(request,pk):
 
 
 def create_principle(request):
-    if str(request.session['utype']) == 'admin':
+    if str(request.session['u']) == 'admin':
 
         if request.method == "POST":
             # Get form data
@@ -650,7 +651,7 @@ def create_principle(request):
         return render(request,'loginrelated/diffrentuser.html')
     
 def create_staff(request):
-    if str(request.session['utype']) == 'admin':
+    if str(request.session['u']) == 'admin':
 
         if request.method == "POST":
             # Get form data
